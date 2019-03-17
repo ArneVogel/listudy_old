@@ -56,6 +56,7 @@ func main() {
 	templates["home.html"] = template.Must(template.ParseFiles("view/home.html", "view/base.html"))
 	templates["login.html"] = template.Must(template.ParseFiles("view/login.html", "view/base.html"))
 	templates["register.html"] = template.Must(template.ParseFiles("view/register.html", "view/base.html"))
+	templates["user.html"] = template.Must(template.ParseFiles("view/user.html", "view/base.html"))
 	templates["create_study.html"] = template.Must(template.ParseFiles("view/create_study.html", "view/base.html"))
 
 	e.Renderer = &TemplateRegistry{
@@ -72,11 +73,14 @@ func main() {
 	// for making the db connection avaliable in the handler
 	ah := &handler.AuthHandler{DB: db}
 	sh := &handler.StudyHandler{DB: db}
+	uh := &handler.UserHandler{DB: db}
 
 	e.POST("/register", ah.RegisterPOSTHandler)
 	e.POST("/login", ah.LoginPOSTHandler)
 
 	e.POST("/create-study", sh.CreateStudyPOSTHandler)
+
+	e.GET("/user/*", uh.UserGETHandler)
 
 	e.Logger.Fatal(e.Start(":8000"))
 }
