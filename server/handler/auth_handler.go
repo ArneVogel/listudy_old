@@ -59,7 +59,7 @@ func (h *AuthHandler) LoginPOSTHandler(c echo.Context) error {
 }
 
 func LoginGETHandler(c echo.Context) error {
-	return c.Render(http.StatusOK, "login.html", map[string]interface{}{})
+	return c.Render(http.StatusOK, "login.html", utils.ClaimsForRender(c.Cookies()))
 }
 
 func LogoutHandler(c echo.Context) error {
@@ -100,5 +100,5 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 }
 
 func RegisterGETHandler(c echo.Context) error {
-	return c.Render(http.StatusOK, "register.html", map[string]interface{}{})
+	return c.Render(http.StatusOK, "register.html", utils.ClaimsForRender(c.Cookies()))
 }

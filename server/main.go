@@ -56,6 +56,7 @@ func main() {
 	templates["home.html"] = template.Must(template.ParseFiles("view/home.html", "view/base.html"))
 	templates["login.html"] = template.Must(template.ParseFiles("view/login.html", "view/base.html"))
 	templates["register.html"] = template.Must(template.ParseFiles("view/register.html", "view/base.html"))
+	templates["create_study.html"] = template.Must(template.ParseFiles("view/create_study.html", "view/base.html"))
 
 	e.Renderer = &TemplateRegistry{
 		templates: templates,
@@ -65,6 +66,7 @@ func main() {
 	e.POST("/", handler.HomeHandler)
 	e.GET("/login", handler.LoginGETHandler)
 	e.GET("/logout", handler.LogoutHandler)
+	e.GET("/create-study", handler.CreateStudyGETHandler)
 	e.GET("/register", handler.RegisterGETHandler)
 
 	h := &handler.AuthHandler{DB: db}

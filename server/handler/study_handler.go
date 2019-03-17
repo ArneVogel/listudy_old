@@ -11,6 +11,6 @@ import (
 
 type StudyHandler utils.Handler
 
-func createStudyGET(c echo.Context) error {
-	return c.Render(http.StatusOK, "create_study.html", map[string]interface{}{})
+func CreateStudyGETHandler(c echo.Context) error {
+	return c.Render(http.StatusOK, "create_study.html", utils.ClaimsForRender(c.Cookies()))
 }
