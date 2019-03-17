@@ -114,3 +114,18 @@ func UserExists(user string, db *sql.DB) bool {
 
 	return id != 0
 }
+
+//assumes user exists
+func UserIdFromName(user string, db *sql.DB) int {
+	stmt, err := db.Prepare("select id from user where name = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	var id int = 0
+	stmt.QueryRow(user).Scan(&id)
+
+	return id
+
+}

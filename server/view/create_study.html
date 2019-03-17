@@ -10,7 +10,7 @@ this is a description
 
 {{define "content"}}
 <h1>Login</h1>
-<form action="/create-study" method="POST">
+<form action="/create-study" method="POST" enctype="multipart/form-data">
     <input type="text" name="title"><br>
     <input type="file" name="pgn"><br>
     <input type="submit" value="Submit">

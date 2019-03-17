@@ -69,8 +69,14 @@ func main() {
 	e.GET("/create-study", handler.CreateStudyGETHandler)
 	e.GET("/register", handler.RegisterGETHandler)
 
-	h := &handler.AuthHandler{DB: db}
-	e.POST("/register", h.RegisterPOSTHandler)
-	e.POST("/login", h.LoginPOSTHandler)
+	// for making the db connection avaliable in the handler
+	ah := &handler.AuthHandler{DB: db}
+	sh := &handler.StudyHandler{DB: db}
+
+	e.POST("/register", ah.RegisterPOSTHandler)
+	e.POST("/login", ah.LoginPOSTHandler)
+
+	e.POST("/create-study", sh.CreateStudyPOSTHandler)
+
 	e.Logger.Fatal(e.Start(":8000"))
 }
