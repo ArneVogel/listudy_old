@@ -1,0 +1,18 @@
+{{ define "title"}}
+This is the homepage
+{{end}}
+
+{{define "description"}}
+this is a description
+{{end}}
+
+{{define "js"}}{{end}}
+
+{{define "content"}}
+<h1>Login</h1>
+<form action="/login" method="POST">
+    <input type="text" name="username"><br>
+    <input type="password" name="password"><br>
+    <input type="submit" value="Submit">
+</form>
+{{end}}

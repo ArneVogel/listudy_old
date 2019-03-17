@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- basics -->
+        <meta charset="utf-8">
+        <title>{{template "title" .}}</title>
+        <meta name="description" content="{{template "description" .}}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- css -->
+        <link rel="stylesheet" href="/static/skeleton.css">
+        {{template "js" .}}
+
+        <!-- js -->
+        
+        <!-- favicon -->
+        <link rel="icon" type="image/png" href="/static/favicon.png">
+    </head>
+    <body>
+        <div class="container">
+            {{ if .loggedin }}
+                Hello {{ .name }}
+                <a href="/logout">Logout</a>
+            {{ else }}
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            {{ end }}
+        </div>
+        <div class="container">
+            {{template "content" . }}
+        </div>
+    </body>
+</html>
