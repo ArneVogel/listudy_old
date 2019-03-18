@@ -9,6 +9,7 @@ import (
 
 	"./database"
 	"./handler"
+	"./utils"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -33,7 +34,7 @@ func main() {
 		database.Create_db()
 	}
 
-	db, err := sql.Open("sqlite3", database.DB_name())
+	db, err := sql.Open("sqlite3", utils.Env("database_name"))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 
 func GetClaims(cookie string) jwt.MapClaims {
 	token, _ := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+		return []byte(Env("secret")), nil
 	})
 	return token.Claims.(jwt.MapClaims)
 }

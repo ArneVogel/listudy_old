@@ -6,12 +6,12 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/joho/godotenv"
+	"../utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func Create_db() {
-	db, err := sql.Open("sqlite3", DB_name())
+	db, err := sql.Open("sqlite3", utils.Env("database_name"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +35,6 @@ func Create_db() {
 		create table study(
 			id text not null primary key, 
 			user_id integer not null, 
-			pgn text not null, 
 			title text not null,
 			foreign key(user_id) references user(id) 
 		);
@@ -74,7 +73,7 @@ func Create_db() {
 }
 
 func DB_exists() bool {
-	return file_exists(DB_name())
+	return file_exists(utils.Env("database_name"))
 }
 
 func file_exists(f string) bool {
@@ -85,16 +84,16 @@ func file_exists(f string) bool {
 	return err == nil
 }
 
-func DB_name() string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("error loading .env file")
-	}
-	return os.Getenv("database_name")
-}
-
 func EscapeString(s string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return reg.ReplaceAllString(s, "")
+}
+
+func EscapeStringWithSpaces(s string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
 	if err != nil {
 		log.Fatal(err)
 	}

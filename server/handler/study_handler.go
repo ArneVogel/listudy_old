@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"bytes"
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"../database"
 	"../utils"
@@ -21,7 +21,7 @@ func CreateStudyGETHandler(c echo.Context) error {
 
 func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
-	title := database.EscapeString(c.FormValue("title"))
+	title := database.EscapeStringWithSpaces(c.FormValue("title"))
 	id := utils.Salt(7)
 	claims := utils.ClaimsForRender(c.Cookies())
 
@@ -43,24 +43,27 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	}
 	defer src.Close()
 
-	buffer := bytes.NewBuffer(make([]byte, 0))
-
-	if _, err = io.Copy(buffer, src); err != nil {
+	dst, err := os.Create(utils.Env("pgn_folder") + id + ".pgn")
+	if err != nil {
 		return err
 	}
+	defer dst.Close()
 
-	pgn := buffer.String()
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
 
 	tx, err := h.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("insert into study(id, user_id, pgn, title) values(?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert into study(id, user_id, title) values(?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(id, user_id, pgn, title)
+	_, err = stmt.Exec(id, user_id, title)
 	if err != nil {
 		log.Fatal(err)
 	}

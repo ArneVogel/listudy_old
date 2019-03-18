@@ -1,2 +1,3 @@
 .env
 listudy.sql
+server/static/pgn/**
