@@ -11,14 +11,18 @@ import (
 	"github.com/labstack/echo"
 )
 
-//id text, pgn text, title text
-
 type StudyHandler utils.Handler
 
 func CreateStudyGETHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "create_study.html", utils.ClaimsForRender(c.Cookies()))
 }
 
+func GetStudyHandler(c echo.Context) error {
+	return c.Render(http.StatusOK, "create_study.html", utils.ClaimsForRender(c.Cookies()))
+
+}
+
+//creates a study with a random name, the pgn is saved in .env pgn_folder
 func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
 	title := database.EscapeStringWithSpaces(c.FormValue("title"))

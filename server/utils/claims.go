@@ -30,6 +30,7 @@ func ClaimsForRender(cookies []*http.Cookie) map[string]interface{} {
 		"name":     claims["username"],
 		"title":    claims["title"],
 		"loggedin": claims["loggedin"],
+		"root_url": Env("root_url"),
 	}
 }
 

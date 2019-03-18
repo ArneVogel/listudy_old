@@ -10,5 +10,7 @@ this is a description
 
 {{define "content"}}
 <h1>{{.userProfile}}</h1>
-
+{{range $index, $value := .study_ids}}
+<a href="{{$.root_url}}study/{{$value}}">{{index $.study_titles $index}}</a><br>
+{{end}}
 {{end}}
