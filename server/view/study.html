@@ -1,0 +1,31 @@
+{{ define "title"}}
+This is the homepage
+{{end}}
+
+{{define "description"}}
+this is a description
+{{end}}
+
+{{define "js"}}
+    <script>
+        var pgn = {{.pgn}};
+        var orientation = {{.orientation}}
+    </script>
+{{end}}
+
+{{define "css"}}
+    <link rel="stylesheet" href="/static/css/chessground.css">
+    <link rel="stylesheet" href="/static/css/theme.css">
+    <link rel="stylesheet" href="/static/css/3d.css">
+{{end}}
+{{define "afterBodyJS"}}
+    <script type="application/javascript" src="/static/js/study.js"></script>
+{{end}}
+
+{{define "content"}}
+<h1>{{.study_title}}</h1>
+<section class="blue merida">
+    <div id="chessboard" class="manipulable cg-board-wrap"></div>
+</section>
+<p>by: {{.creator}}</p>
+{{end}}

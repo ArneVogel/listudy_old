@@ -8,10 +8,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <!-- css -->
-        <link rel="stylesheet" href="/static/skeleton.css">
-        {{template "js" .}}
+        <link rel="stylesheet" href="/static/css/skeleton.css">
+        {{template "css" .}}
 
         <!-- js -->
+        {{template "js" .}}
         
         <!-- favicon -->
         <link rel="icon" type="image/png" href="/static/favicon.png">
@@ -22,6 +23,7 @@
                 Hello {{ .name }}
                 <a href="/logout">Logout</a>
                 <a href="/create-study">create a study</a>
+                <a href="/user/{{.name}}">Profile</a>
             {{ else }}
                 <a href="/login">Login</a>
                 <a href="/register">Register</a>
@@ -30,5 +32,6 @@
         <div class="container">
             {{template "content" . }}
         </div>
+        {{template "afterBodyJS" .}}
     </body>
 </html>

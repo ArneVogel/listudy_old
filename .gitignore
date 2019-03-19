@@ -1,3 +1,4 @@
 .env
 listudy.sql
 server/static/pgn/**
+app/node_modules/**

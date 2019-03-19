@@ -36,6 +36,7 @@ func Create_db() {
 			id text not null primary key, 
 			user_id integer not null, 
 			title text not null,
+			orientation text not null,
 			foreign key(user_id) references user(id) 
 		);
 	`

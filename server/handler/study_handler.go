@@ -2,9 +2,11 @@ package handler
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"../database"
 	"../utils"
@@ -17,8 +19,35 @@ func CreateStudyGETHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "create_study.html", utils.ClaimsForRender(c.Cookies()))
 }
 
-func GetStudyHandler(c echo.Context) error {
-	return c.Render(http.StatusOK, "create_study.html", utils.ClaimsForRender(c.Cookies()))
+func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
+	b := utils.ClaimsForRender(c.Cookies())
+	studyID := studyIDFromURL(c.Request().URL.String())
+
+	stmt, err := h.DB.Prepare("select s.title, u.name, s.orientation from study s join user u on s.user_id == u.id where s.id == ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	var title string
+	var user string
+	var orientation string
+
+	stmt.QueryRow(studyID).Scan(&title, &user, &orientation)
+
+	b["study_title"] = title
+	b["creator"] = user
+	b["study_id"] = studyID
+	b["orientation"] = orientation
+
+	content, err := ioutil.ReadFile(utils.Env("pgn_folder") + studyID + ".pgn")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b["pgn"] = string(content)
+
+	return c.Render(http.StatusOK, "study.html", b)
 
 }
 
@@ -26,6 +55,7 @@ func GetStudyHandler(c echo.Context) error {
 func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
 	title := database.EscapeStringWithSpaces(c.FormValue("title"))
+	orientation := c.FormValue("orientation")
 	id := utils.Salt(7)
 	claims := utils.ClaimsForRender(c.Cookies())
 
@@ -62,16 +92,21 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("insert into study(id, user_id, title) values(?, ?, ?)")
+	stmt, err := tx.Prepare("insert into study(id, user_id, title, orientation) values(?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(id, user_id, title)
+	_, err = stmt.Exec(id, user_id, title, orientation)
 	if err != nil {
 		log.Fatal(err)
 	}
 	tx.Commit()
 
 	return c.Redirect(303, "http://localhost:8000")
+}
+
+func studyIDFromURL(url string) string {
+	split := strings.Split(url, "/")
+	return split[len(split)-1]
 }

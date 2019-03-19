@@ -7,12 +7,19 @@ this is a description
 {{end}}
 
 {{define "js"}}{{end}}
+{{define "css"}}{{end}}
+{{define "afterBodyJS"}}{{end}}
+
 
 {{define "content"}}
 <h1>Login</h1>
 <form action="/create-study" method="POST" enctype="multipart/form-data">
     <input type="text" name="title"><br>
     <input type="file" name="pgn"><br>
+    <select name="orientation">
+        <option value="white">White</option>
+        <option value="black">Black</option>
+    </select>
     <input type="submit" value="Submit">
 </form>
 {{end}}
