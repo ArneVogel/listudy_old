@@ -6477,14 +6477,24 @@ var utils = require('./utils/utils.js')
 var consts = require('./utils/consts.js')
 
 var game_db = kokopu.pgnRead(pgn);
-var ground = Chessground(document.getElementById("chessboard"), consts.getChessGroundConfig(orientation));
-console.log(consts.getChessGroundConfig("black"));
+var ground = Chessground(document.getElementById("chessboard"), consts.getChessGroundConfig(orientation, game_db.game(0).initialPosition().fen()));
+console.log(game_db)
+console.log(game_db.game(0))
+window.game_db = game_db
+window.ground = ground
+window.kokopu = kokopu
+window.sToC = kokopu.squareToCoordinates
+window.cToS = kokopu.coordinatesToSquare
+
+console.log(kokopu.squareToCoordinates("b3"))
+console.log(kokopu.coordinatesToSquare(1,2))
 
 },{"./utils/consts.js":36,"./utils/utils.js":37,"chessground":4,"kokopu":18}],36:[function(require,module,exports){
 const base_url = "http://localhost:8000/"
 
 // https://github.com/ornicar/chessground/blob/master/src/config.ts
 var chessGroundConfig = {
+    fen: '',
     orientation: 'white',
     movable: {
         free: false,
@@ -6493,8 +6503,9 @@ var chessGroundConfig = {
     }
 }
 
-function getChessGroundConfig(orientation) {
+function getChessGroundConfig(orientation, fen) {
     var a = chessGroundConfig;
+    a["fen"] = fen;
     a["orientation"] = orientation;
     a["movable"]["color"] = orientation;
     return a;
