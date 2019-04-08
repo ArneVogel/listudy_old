@@ -12,6 +12,14 @@ window.ground = ground
 window.kokopu = kokopu
 window.sToC = kokopu.squareToCoordinates
 window.cToS = kokopu.coordinatesToSquare
+window.translate = utils.toAlgebraic
 
 console.log(kokopu.squareToCoordinates("b3"))
 console.log(kokopu.coordinatesToSquare(1,2))
+
+var a = game_db.game(0)._mainVariationInfo.first;
+window.a = a;
+while (a.next != undefined) {
+    console.log(a.next)
+    a = a.next
+}

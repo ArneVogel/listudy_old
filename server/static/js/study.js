@@ -6485,9 +6485,17 @@ window.ground = ground
 window.kokopu = kokopu
 window.sToC = kokopu.squareToCoordinates
 window.cToS = kokopu.coordinatesToSquare
+window.translate = utils.toAlgebraic
 
 console.log(kokopu.squareToCoordinates("b3"))
 console.log(kokopu.coordinatesToSquare(1,2))
+
+var a = game_db.game(0)._mainVariationInfo.first;
+window.a = a;
+while (a.next != undefined) {
+    console.log(a.next)
+    a = a.next
+}
 
 },{"./utils/consts.js":36,"./utils/utils.js":37,"chessground":4,"kokopu":18}],36:[function(require,module,exports){
 const base_url = "http://localhost:8000/"
@@ -6517,33 +6525,21 @@ module.exports = {
 }
 
 },{}],37:[function(require,module,exports){
-var consts = require('./consts.js')
+var kokopu = require('kokopu');
 
-function studyURL() {
-    var url = window.location.href;
-    var split = url.split("/");
-    return consts.base_url + "static/pgn/" + split[split.length -1] + ".pgn"
-}
-
-async function getPGN() {
-    const res = await request.get(studyURL())
-    return res
-}
-
-function waitForPGN() {
-    var a = getPGN()
-    while (a.length < 30) {
-        
+//translates the number kokopu gives a square to algebraic notation
+function toAlgebraic(i) {
+    rank = 0;
+    while (rank*16 <= i) {
+        rank += 1;
     }
-    return a
+    rank -= 1;
+    file = i % 8;
+    return kokopu.coordinatesToSquare(file,rank);
 }
 
 module.exports = {
-    studyURL: studyURL,
-    getPGN: getPGN,
-    waitForPGN, waitForPGN
+    toAlgebraic: toAlgebraic
 }
 
-
-
-},{"./consts.js":36}]},{},[35]);
+},{"kokopu":18}]},{},[35]);

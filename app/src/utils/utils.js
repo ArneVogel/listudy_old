@@ -1,28 +1,16 @@
-var consts = require('./consts.js')
+var kokopu = require('kokopu');
 
-function studyURL() {
-    var url = window.location.href;
-    var split = url.split("/");
-    return consts.base_url + "static/pgn/" + split[split.length -1] + ".pgn"
-}
-
-async function getPGN() {
-    const res = await request.get(studyURL())
-    return res
-}
-
-function waitForPGN() {
-    var a = getPGN()
-    while (a.length < 30) {
-        
+//translates the number kokopu gives a square to algebraic notation
+function toAlgebraic(i) {
+    rank = 0;
+    while (rank*16 <= i) {
+        rank += 1;
     }
-    return a
+    rank -= 1;
+    file = i % 8;
+    return kokopu.coordinatesToSquare(file,rank);
 }
 
 module.exports = {
-    studyURL: studyURL,
-    getPGN: getPGN,
-    waitForPGN, waitForPGN
+    toAlgebraic: toAlgebraic
 }
-
-

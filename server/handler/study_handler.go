@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+    "errors"
 
 	"../database"
 	"../utils"
@@ -55,7 +56,12 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
 	title := database.EscapeStringWithSpaces(c.FormValue("title"))
+    if len([]rune(title)) <= 0 {
+        return errors.New("Title cannot be empty")
+    }
 	orientation := c.FormValue("orientation")
+
+    //7 random characters a-zA-Z0-9
 	id := utils.Salt(7)
 	claims := utils.ClaimsForRender(c.Cookies())
 
@@ -67,6 +73,7 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	}
 	user_id := 1
 
+    //TODO make sure this is a pgn file
 	file, err := c.FormFile("pgn")
 	if err != nil {
 		return err
