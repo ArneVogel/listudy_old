@@ -6477,8 +6477,8 @@ exports.coordinatesToSquare = function(file, rank) {
 },{"./basetypes":19,"./exception":21}],35:[function(require,module,exports){
 var kokopu = require('kokopu');
 var Chessground = require("chessground").Chessground;
-var utils = require('./utils/utils.js')
-var consts = require('./utils/consts.js')
+var utils = require('./utils/utils.js');
+var consts = require('./utils/consts.js');
 
 var game_db = kokopu.pgnRead(pgn);
 var game_div = document.getElementById("chessboard")
@@ -6500,20 +6500,19 @@ var a = game_db.game(0)._mainVariationInfo.first;
 window.a = a;
 function iterateMoves(game, pos) {
     var variation = game.first;
-    //pos += "m"
     while (variation.next != undefined) {
         for (var i = 0; i < variation.variations.length; i++) {
             iterateMoves(variation.variations[i], pos + i)
         }
-        console.log(pos, variation)
         variation = variation.next;
         pos += "m"
+        cards[pos] = 0
     }
 }
 
-function moveFromPos(game, pos) {
-    console.log(game)
-    game = game.first;
+function possibleMoves(game, pos) {
+    var position = new kokopu.Position();
+    game = game._mainVariationInfo.first;
     for (var i = 0; i < pos.length; i++) {
         if (pos[i] == "m") {
             game = game.next;
@@ -6521,36 +6520,67 @@ function moveFromPos(game, pos) {
             game = game.variations[pos[i]].first;
         }
     }
-    console.log(game)
+    var moves = [];
+    moves.push(position.notation(game.moveDescriptor))
+    for (var i = 0; i < game.variations.length; i++) {
+        moves.push(position.notation(game.variations[i].first.moveDescriptor))
+    }
+    return moves;
 }
+
+function allLegalMoves(game, position_string) {
+    var position = game._initialPosition; 
+    game = game._mainVariationInfo.first;
+    for (var i = 0; i < position_string.length; i++) {
+        if (position_string[i] == "m") {
+            position.play(position.notation(game.moveDescriptor));
+            game = game.next;
+        } else {
+            position.play(position.notation(game.variations[position_string[i]].first.moveDescriptor));
+            game = game.variations[position_string[i]].first.next;
+        }
+    }
+    moves_moveDescriptor = position.moves();
+    moves = {}
+    for (var i = 0; i < moves_moveDescriptor.length; i++) {
+        if (moves[utils.toAlgebraic(moves_moveDescriptor[i]._from)] == undefined) {
+            moves[utils.toAlgebraic(moves_moveDescriptor[i]._from)] = [utils.toAlgebraic(moves_moveDescriptor[i]._to)]
+        } else {
+            moves[utils.toAlgebraic(moves_moveDescriptor[i]._from)].push(utils.toAlgebraic(moves_moveDescriptor[i]._to))
+        }
+    }
+    return moves;
+}
+window.allLegalMoves = allLegalMoves;
 
 function setToPos(game, position_string) {
     var position = game._initialPosition; 
     game = game._mainVariationInfo.first;
     for (var i = 0; i < position_string.length; i++) {
-        console.log(position.fen())
-        console.log(utils.toAlgebraic(game.moveDescriptor._from));
-        console.log(utils.toAlgebraic(game.moveDescriptor._to));
-        console.log(game.moveDescriptor);
         if (position_string[i] == "m") {
-            position.play(game.moveDescriptor);
+            position.play(position.notation(game.moveDescriptor));
             game = game.next;
         } else {
-            position.play(game.moveDescriptor);
-            game = game.variations[position_string[i]].first;
+            position.play(position.notation(game.variations[position_string[i]].first.moveDescriptor));
+            game = game.variations[position_string[i]].first.next;
         }
     }
     ground.set(consts.getChessGroundConfig(orientation, position.fen()))
-    window.position = position;
-    console.log(position.fen())
 }
 
+cards = {}
 iterateMoves(game_db.game(0)._mainVariationInfo, "");
-moveFromPos(game_db.game(0)._mainVariationInfo, "0m2mmm");
 setToPos(game_db.game(0), "m");
-window.setToPos = setToPos
+window.setToPos = setToPos;
+window.possibleMoves = possibleMoves;
+window.cards = cards;
+console.log(cards)
+setToPos(game_db.game(0), "");
+ground.state.movable.dests = allLegalMoves(game_db.game(0), "")
 
-},{"./utils/consts.js":36,"./utils/utils.js":37,"chessground":4,"kokopu":18}],36:[function(require,module,exports){
+},{"./utils/consts.js":36,"./utils/utils.js":38,"chessground":4,"kokopu":18}],36:[function(require,module,exports){
+var utils = require('./utils.js');
+var handler = require('./handler.js');
 const base_url = "http://localhost:8000/"
 
 // https://github.com/ornicar/chessground/blob/master/src/config.ts
@@ -6560,7 +6590,11 @@ var chessGroundConfig = {
     movable: {
         free: false,
         dropOff: 'revert',
-        showDests: true
+        dests: {a2:["a3", "a4"], b1:["a3"]},
+        showDests: true,
+        events: {
+            after: handler.handleMove
+        }
     }
 }
 
@@ -6577,7 +6611,19 @@ module.exports = {
     getChessGroundConfig: getChessGroundConfig
 }
 
-},{}],37:[function(require,module,exports){
+},{"./handler.js":37,"./utils.js":38}],37:[function(require,module,exports){
+function handleMove(orig, dest, metadata) {
+    console.log("Hi")
+    console.log(`orig: {orig}, dest: {dest}, metadata: {metadata}`)
+    console.log(orig)
+}
+
+
+module.exports = {
+    handleMove: handleMove
+}
+
+},{}],38:[function(require,module,exports){
 var kokopu = require('kokopu');
 
 //translates the number kokopu gives a square to algebraic notation
@@ -6591,8 +6637,13 @@ function toAlgebraic(i) {
     return kokopu.coordinatesToSquare(file,rank);
 }
 
+function movesFromMoveDescriptor(md) {
+    return [toAlgebraic(md._from), toAlgebraic(md._to)];
+}
+
 module.exports = {
-    toAlgebraic: toAlgebraic
+    toAlgebraic: toAlgebraic,
+    movesFromMoveDescriptor: movesFromMoveDescriptor
 }
 
 },{"kokopu":18}]},{},[35]);

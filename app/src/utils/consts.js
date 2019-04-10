@@ -1,3 +1,5 @@
+var utils = require('./utils.js');
+var handler = require('./handler.js');
 const base_url = "http://localhost:8000/"
 
 // https://github.com/ornicar/chessground/blob/master/src/config.ts
@@ -7,7 +9,11 @@ var chessGroundConfig = {
     movable: {
         free: false,
         dropOff: 'revert',
-        showDests: true
+        dests: {a2:["a3", "a4"], b1:["a3"]},
+        showDests: true,
+        events: {
+            after: handler.handleMove
+        }
     }
 }
 

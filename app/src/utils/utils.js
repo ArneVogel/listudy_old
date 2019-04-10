@@ -11,6 +11,11 @@ function toAlgebraic(i) {
     return kokopu.coordinatesToSquare(file,rank);
 }
 
+function movesFromMoveDescriptor(md) {
+    return [toAlgebraic(md._from), toAlgebraic(md._to)];
+}
+
 module.exports = {
-    toAlgebraic: toAlgebraic
+    toAlgebraic: toAlgebraic,
+    movesFromMoveDescriptor: movesFromMoveDescriptor
 }
