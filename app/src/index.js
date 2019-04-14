@@ -20,6 +20,7 @@ var iterCards = {}
 //creates the cards and puts the into the global variable iterCards
 function iterateMoves(game, position) {
     var variation;
+    if (game == undefined) {return;}
     if (game.isLongVariation == undefined) {
         variation = game;
     } else {
@@ -53,6 +54,20 @@ function possibleMoves(game, position_string) {
     }
     return moves;
 }
+
+function gameAtPos(game, position_string) {
+    var position = new kokopu.Position();
+    game = game._mainVariationInfo.first;
+    for (var i = 0; i < position_string.length; i++) {
+        if (position_string[i] == "m") {
+            game = game.next;
+        } else {
+            game = game.variations[position_string[i]].first.next;
+        }
+    }
+    return game;
+}
+window.gameAtPos = gameAtPos;
 
 function allLegalMoves(game, position_string) {
     var position = game._initialPosition; 

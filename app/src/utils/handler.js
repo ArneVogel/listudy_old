@@ -30,6 +30,7 @@ function anotherMove(cards, pos) {
 }
 window.anotherMove = anotherMove
 
+//draws the shapes of the possible moves at the current position
 function drawShapes() {
     moves = possibleMoves(game_db.game(game_number-1), pos);
     shapes = [];
@@ -61,8 +62,51 @@ function filterPossible(cards, moves, pos) {
     return tmp;
 }
 
+//draws the shapes drawn by the pgn creator
+function drawCustomShapes() {
+    game = gameAtPos(game_db.game(game_number-1), pos.substring(0,pos.length-1));
+
+    // csl = points
+    // cal = arrows
+    var csl, cal;
+    if (game.tags.cal != undefined) {
+        cal = game.tags.cal.split(",");
+    }
+    
+    if (game.tags.csl != undefined) {
+        csl = game.tags.csl.split(",");
+    }
+
+    shapes = ground.state.drawable.shapes;
+    for (var i in cal) {
+        console.log(cal[i])
+        var color, orig, dest;
+        switch(cal[i][0]) {
+            case 'G':
+                color = "green";
+                break;
+        }
+        orig = cal[i].substring(1,3);
+        dest = cal[i].substring(3,5);
+        shapes.push({orig:orig, dest:dest, brush:color});
+    }
+
+    for (var i in csl) {
+        var color, orig;
+        switch(csl[i][0]) {
+            case 'G':
+                color = "green";
+                break;
+        }
+        orig = csl[i].substring(1,3);
+        shapes.push({orig:orig, brush:color});
+    }
+    console.log(shapes)
+    ground.setShapes(shapes);
+}
+window.drawCustomShapes = drawCustomShapes;
+
 async function handleMove(orig, dest, metadata) {
-    //TODO make sure that the player has another move after making the play for the opponent
     var move = moveExists(filterPossible(cards[game_number-1], possibleMoves(game_db.game(game_number-1), window.pos), pos), [orig, dest])
     var tmp;
     if (move == 0) {
@@ -86,9 +130,10 @@ async function handleMove(orig, dest, metadata) {
 
         await sleep(200);
         //TODO show the move that the other player could do
+        //TODO show the last move from the other player
+        //or maybe not, not sure tbh, does it add value to the training?
 
         pos = smallestPos(cards[game_number-1])
-        //TODO show the last move from the other player
         setToPos(game_db.game(game_number-1), window.pos);
 
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
@@ -142,6 +187,7 @@ async function handleMove(orig, dest, metadata) {
 
         if (cards[game_number-1][pos] < learn_threshold) {
             drawShapes();
+            drawCustomShapes();
         }
 
     } else {
@@ -158,6 +204,7 @@ async function handleMove(orig, dest, metadata) {
 
         if (wrong_counter >= 2) {
             drawShapes();
+            drawCustomShapes();
         }
     }
 
