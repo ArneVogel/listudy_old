@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -46,8 +45,6 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	b["orientation"] = orientation
 	b["progress"] = progress
 
-	fmt.Println(orientation, studyID)
-
 	content, err := ioutil.ReadFile(utils.Env("pgn_folder") + studyID + ".pgn")
 	if err != nil {
 		log.Fatal(err)
@@ -59,7 +56,6 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 }
 
 func (h *StudyHandler) SaveProgress(c echo.Context) error {
-	fmt.Println("hi")
 	progress := database.EscapeString(c.FormValue("progress"))
 	claims := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())
@@ -151,6 +147,7 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 }
 
 func studyIDFromURL(url string) string {
+	url = strings.Split(url, "?")[0]
 	split := strings.Split(url, "/")
 	return split[len(split)-1]
 }

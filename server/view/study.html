@@ -33,6 +33,10 @@ this is a description
     <option value="1">1</option>
 </select>
 <br>
-<button type="button" onclick="submitProgress('{{.study_id}}')">Submit Progress</button>
+{{ if .loggedin }}
+    <button type="button" onclick="submitProgress('{{.study_id}}')">Submit Progress</button>
+{{ else }}
+    <button type="button" onclick="window.location.href='/login'">Login to save Progress</button>
+{{ end }}
 <p>by: {{.creator}}</p>
 {{end}}
