@@ -4,3 +4,4 @@ server/static/pgn/**
 app/node_modules/**
 app/bin/**
 server/static/js/study.js
+server/server
