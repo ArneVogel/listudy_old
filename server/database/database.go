@@ -51,7 +51,8 @@ func Create_db() {
 			study_id text, 
 			repetition text, 
 			foreign key(user_id) references user(id), 
-			foreign key(study_id) references study(id)
+			foreign key(study_id) references study(id),
+			unique(user_id, study_id)
 		);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -86,7 +87,7 @@ func file_exists(f string) bool {
 }
 
 func EscapeString(s string) string {
-	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	reg, err := regexp.Compile("[^a-zA-Z0-9\\{}:,\"]+")
 	if err != nil {
 		log.Fatal(err)
 	}

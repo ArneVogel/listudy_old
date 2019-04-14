@@ -6484,46 +6484,49 @@ var game_db = kokopu.pgnRead(pgn);
 var game_div = document.getElementById("chessboard")
 var ground = Chessground(game_div, consts.getChessGroundConfig(orientation, game_db.game(0).initialPosition().fen()));
 
-//console.log(game_db)
-//console.log(game_db.game(0))
 window.game_db = game_db
 window.ground = ground
 window.kokopu = kokopu
-window.sToC = kokopu.squareToCoordinates
-window.cToS = kokopu.coordinatesToSquare
 window.translate = utils.toAlgebraic
 window.getConfig = consts.getChessGroundConfig
-//console.log(kokopu.squareToCoordinates("b3"))
-//console.log(kokopu.coordinatesToSquare(1,2))
 
 var a = game_db.game(0)._mainVariationInfo.first;
 window.a = a;
-function iterateMoves(game, pos) {
-    var variation = game.first;
-    while (variation.next != undefined) {
+
+var iterCards = {}
+//creates the cards and puts the into the global variable iterCards
+function iterateMoves(game, position) {
+    var variation;
+    if (game.isLongVariation == undefined) {
+        variation = game;
+    } else {
+        variation = game.first;
+    }
+    while (variation!= undefined) {
         for (var i = 0; i < variation.variations.length; i++) {
-            iterateMoves(variation.variations[i], pos + i)
+            iterateMoves(variation.variations[i].first.next, position + "" + i)
         }
         variation = variation.next;
-        pos += "m"
-        cards[pos] = 0
+        iterCards[position] = 0
+        position += "m"
+        iterCards[position] = 0
     }
 }
 
-function possibleMoves(game, pos) {
+function possibleMoves(game, position_string) {
     var position = new kokopu.Position();
     game = game._mainVariationInfo.first;
-    for (var i = 0; i < pos.length; i++) {
-        if (pos[i] == "m") {
+    for (var i = 0; i < position_string.length; i++) {
+        if (position_string[i] == "m") {
             game = game.next;
         } else {
-            game = game.variations[pos[i]].first;
+            game = game.variations[position_string[i]].first.next;
         }
     }
     var moves = [];
-    moves.push(position.notation(game.moveDescriptor))
+    moves.push(utils.movesFromMoveDescriptor(game.moveDescriptor))
     for (var i = 0; i < game.variations.length; i++) {
-        moves.push(position.notation(game.variations[i].first.moveDescriptor))
+        moves.push(utils.movesFromMoveDescriptor(game.variations[i].first.moveDescriptor))
     }
     return moves;
 }
@@ -6554,39 +6557,135 @@ function allLegalMoves(game, position_string) {
 window.allLegalMoves = allLegalMoves;
 
 function setToPos(game, position_string) {
+    //if theres a number, add a extra m behind it
+    tmp = ""
+    for (var i = 0; i < position_string.length; i++) {
+        if (position_string[i] == "m") {
+            tmp += "m";
+        } else {
+            tmp += position_string[i];
+            tmp += "m";
+        }
+    }
+    position_string = tmp;
     var position = game._initialPosition; 
     game = game._mainVariationInfo.first;
     for (var i = 0; i < position_string.length; i++) {
+        var to_play;
         if (position_string[i] == "m") {
-            position.play(position.notation(game.moveDescriptor));
+            to_play = position.notation(game.moveDescriptor);
             game = game.next;
         } else {
-            position.play(position.notation(game.variations[position_string[i]].first.moveDescriptor));
-            game = game.variations[position_string[i]].first.next;
+            to_play = position.notation(game.variations[position_string[i]].first.moveDescriptor);
+            game = game.variations[position_string[i]].first
         }
+        position.play(to_play);
     }
     ground.set(consts.getChessGroundConfig(orientation, position.fen()))
 }
 
+function smallestPos(cards) {
+    smallest = "";
+    for (var card in cards) {
+        //there has to be a bigger one, otherwise the player cant make a move
+        var skip = true;
+        for (var i in cards) {
+            if (i.startsWith(card) && i.length > card.length) {
+                skip = false;
+            }
+        }
+        if (skip) {
+            continue;
+        }
+
+        if (cards[smallest] == undefined || cards[card] < cards[smallest]) {
+            smallest = card;
+        }
+        if (cards[card] == cards[smallest]) {
+            smallest = card.length < smallest.length ? card : smallest;
+        }
+    }
+    return smallest;
+}
+window.smallestPos = smallestPos;
+
+function createCards() {
+    cards = {}
+    for (var i = 0; i < game_db.gameCount(); i++) {
+        iterCards = {};
+        iterateMoves(game_db.game(i)._mainVariationInfo, "");
+        
+        // remove all the cards that dont have the player make a move
+        // => orientation == first_move remove every 2nd turn starting from 1
+        //    => remove where length in 2n+1
+        // => orientation != first_move remove every 2nd turn starting from 0
+        //    => remove where length in 2n
+
+        // 0 white, 1 black
+        first_move = game_db.game(i)._initialPosition._impl.turn;
+        orientation_move = orientation == "white" ? 0 : 1;
+        
+        var offset = first_move == orientation_move ? 0 : 1;
+
+        var tmp = {};
+        for (var j in iterCards) {
+            if ((j.length + offset) % 2 == 0) {
+                tmp[j] = 0;
+            }
+        }
+        cards[i] = tmp;
+    }
+    return cards;
+}
+
+function initialize(game_number) {
+    window.game_number = game_number;
+    window.wrong_counter = 0;
+    window.learn_threshold = consts.learn_threshold;
+
+    //create the cards if there are none
+    if (progress == "") {
+        window.cards = createCards();
+    } else {
+        window.cards = JSON.parse(progress);
+    }
+
+    console.log(orientation)
+
+    //set the position to the smallest position
+    window.pos = smallestPos(window.cards[game_number-1]);
+    setToPos(game_db.game(game_number-1), window.pos);
+
+    //creates the game_number select options corresponding to the number of games in the game_db and selects the current game
+    utils.createSelectOptions(game_db.gameCount(), game_number);
+    
+    ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+    if (cards[game_number-1][pos] < consts.learn_threshold) {
+        drawShapes();
+    }
+}
+
 cards = {}
-iterateMoves(game_db.game(0)._mainVariationInfo, "");
-setToPos(game_db.game(0), "m");
 window.setToPos = setToPos;
 window.possibleMoves = possibleMoves;
 window.cards = cards;
-console.log(cards)
-setToPos(game_db.game(0), "");
-ground.state.movable.dests = allLegalMoves(game_db.game(0), "")
+
+initialize(1);
+//this has to be a window function to be called from the onchange on game number select
+window.initialize = initialize;
 
 },{"./utils/consts.js":36,"./utils/utils.js":38,"chessground":4,"kokopu":18}],36:[function(require,module,exports){
 var utils = require('./utils.js');
 var handler = require('./handler.js');
-const base_url = "http://localhost:8000/"
+
+const learn_threshold = 2; // what value should a card have to give hints
+const base_url = "http://localhost:8000/";
 
 // https://github.com/ornicar/chessground/blob/master/src/config.ts
 var chessGroundConfig = {
     fen: '',
     orientation: 'white',
+    turnColor: 'white',
     movable: {
         free: false,
         dropOff: 'revert',
@@ -6602,20 +6701,181 @@ function getChessGroundConfig(orientation, fen) {
     var a = chessGroundConfig;
     a["fen"] = fen;
     a["orientation"] = orientation;
+    a["turnColor"] = orientation;
     a["movable"]["color"] = orientation;
     return a;
 }
 
 module.exports = {
     base_url: base_url,
-    getChessGroundConfig: getChessGroundConfig
+    getChessGroundConfig: getChessGroundConfig,
+    learn_threshold: learn_threshold
 }
 
 },{"./handler.js":37,"./utils.js":38}],37:[function(require,module,exports){
-function handleMove(orig, dest, metadata) {
-    console.log("Hi")
-    console.log(`orig: {orig}, dest: {dest}, metadata: {metadata}`)
-    console.log(orig)
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+//returns the index of the move if it exists, or false
+//possible => possibleMoves
+//actual => move that was played
+function moveExists(possible, actual) {
+    for (var i in possible) {
+        if (possible[i][0] == actual[0] && possible[i][1] == actual[1]) {
+            return i;
+        }
+    }
+    return false;
+}
+
+function anotherMove(cards, pos) {
+    for (var i in cards) {
+        if (i.startsWith(pos) && i.length > pos.length+1) {
+            return true;
+        }
+    }    
+    return false;
+}
+window.anotherMove = anotherMove
+
+function drawShapes() {
+    moves = possibleMoves(game_db.game(game_number-1), pos);
+    shapes = [];
+    for (var move in moves) {
+        shapes.push({orig: moves[move][0], dest: moves[move][1], brush:"green"})
+    }
+    ground.setShapes(shapes)
+}
+window.drawShapes = drawShapes;
+
+//make sure after player makes move theres another move to be played by player
+function filterPossible(cards, moves, pos) {
+    var tmp = [];
+    var extra = "";
+    for (var i in moves) {
+        if (i == 0) {
+            extra = "m";
+        } else {
+            extra = i-1;
+        }
+        
+        for (var j in cards) {
+            if (j.startsWith(pos+extra) && j.length + 2 > (pos+extra).length) {
+                tmp.push(moves[i])
+                break;
+            }
+        }
+    }
+    return tmp;
+}
+
+async function handleMove(orig, dest, metadata) {
+    //TODO make sure that the player has another move after making the play for the opponent
+    var move = moveExists(filterPossible(cards[game_number-1], possibleMoves(game_db.game(game_number-1), window.pos), pos), [orig, dest])
+    var tmp;
+    if (move == 0) {
+        tmp = "m"
+    } else if (move != false) {
+        tmp = move-1;
+    } else {
+        tmp = "";
+    }
+    //check if there is another move
+    if (!anotherMove(cards[game_number-1], pos+tmp)) {
+        console.log("no other move")
+        wrong_counter = 0;
+        card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
+        
+        if (move == 0) {
+            pos += "m";
+        } else {
+            pos += move-1;
+        }
+
+        await sleep(200);
+        //TODO show the move that the other player could do
+
+        pos = smallestPos(cards[game_number-1])
+        //TODO show the last move from the other player
+        setToPos(game_db.game(game_number-1), window.pos);
+
+        ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+        ground.state.turnColor = orientation; 
+
+        if (cards[game_number-1][pos] < learn_threshold) {
+            drawShapes();
+        }
+
+        return;
+    }
+    
+    console.log("theres another move: ", pos+tmp);
+
+    //possible moves for the player in the position
+    var move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
+    if (move) {
+        wrong_counter = 0;
+        //update the value of the move
+        card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
+
+        if (move == 0) {
+            pos += "m";
+        } else {
+            pos += move-1;
+        }
+
+        await sleep(200);
+
+
+        //the next move, either continue in the line or pick the smallest unlearned line
+        
+        possible = filterPossible(cards[game_number-1], possibleMoves(game_db.game(game_number-1), pos),pos);
+        play = getRandomInt(0, possible.length-1)
+        ground.move(possible[play][0], possible[play][1])
+        if (play == 0) {
+            pos += "m";
+        } else {
+            pos += play-1;
+        }
+
+        // -2 to give a bias to stay in the line
+        if (! cards[game_number-1][pos] <= (card_value -2)) {
+            pos = smallestPos(cards[game_number-1])
+            setToPos(game_db.game(game_number-1), window.pos);
+
+        }
+
+        ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+        ground.state.turnColor = orientation; 
+
+        if (cards[game_number-1][pos] < learn_threshold) {
+            drawShapes();
+        }
+
+    } else {
+        wrong_counter += 1;
+
+        await sleep(200);
+        //ground.move(dest, orig);
+        setToPos(game_db.game(game_number-1), pos);
+        ground.state.turnColor = orientation; 
+        ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+
+        //update the move value, never make it less than 0
+        cards[game_number-1][pos] = Math.max(cards[game_number-1][pos] -2, 0);
+
+        if (wrong_counter >= 2) {
+            drawShapes();
+        }
+    }
+
 }
 
 
@@ -6641,9 +6901,33 @@ function movesFromMoveDescriptor(md) {
     return [toAlgebraic(md._from), toAlgebraic(md._to)];
 }
 
+function createSelectOptions(amount, selected) {
+    var select = document.getElementById("game_number");
+    select.innerHTML = "";
+    for (var i = 0; i < amount; i++) {
+        var opt = document.createElement("option");
+        opt.value = i+1;
+        opt.innerHTML = i+1;
+        select.appendChild(opt);
+    }
+    select.selectedIndex = selected -1;
+}
+
+function submitProgress(study_id) {
+    var progress = JSON.stringify(cards);
+    var http = new XMLHttpRequest();
+    url = location.protocol + '//' + location.hostname + ":8000/study/progress/" + study_id;
+    http.open("POST", url, true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "progress=" + progress;
+    http.send(params);
+}
+window.submitProgress = submitProgress;
+
 module.exports = {
     toAlgebraic: toAlgebraic,
-    movesFromMoveDescriptor: movesFromMoveDescriptor
+    movesFromMoveDescriptor: movesFromMoveDescriptor,
+    createSelectOptions: createSelectOptions
 }
 
 },{"kokopu":18}]},{},[35]);

@@ -9,7 +9,8 @@ this is a description
 {{define "js"}}
     <script>
         var pgn = {{.pgn}};
-        var orientation = {{.orientation}}
+        var orientation = "{{.orientation}}";
+        var progress = "{{.progress}}";
     </script>
 {{end}}
 
@@ -27,5 +28,11 @@ this is a description
 <section class="blue merida">
     <div id="chessboard" class="manipulable cg-board-wrap"></div>
 </section>
+<br>
+<select id="game_number" onchange="initialize(this.value)">
+    <option value="1">1</option>
+</select>
+<br>
+<button type="button" onclick="submitProgress('{{.study_id}}')">Submit Progress</button>
 <p>by: {{.creator}}</p>
 {{end}}

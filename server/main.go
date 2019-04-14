@@ -81,9 +81,10 @@ func main() {
 	e.POST("/login", ah.LoginPOSTHandler)
 
 	e.POST("/create-study", sh.CreateStudyPOSTHandler)
+	e.POST("/study/progress/*", sh.SaveProgress)
 	e.GET("/study/*", sh.GetStudyHandler)
 
 	e.GET("/user/*", uh.UserGETHandler)
 
-	e.Logger.Fatal(e.Start(":8000"))
+	e.Logger.Fatal(e.Start(":" + utils.Env("port")))
 }
