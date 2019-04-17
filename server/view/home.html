@@ -12,4 +12,7 @@ this is a description
 
 {{define "content"}}
 <h1>this is the homepage</h1>
+{{range $index, $value := .studies}}
+<p>Votes: {{index $.counts $index}}; <a href="{{$.root_url}}study/{{$value}}">{{index $.titles $index}}</a> by <a href="{{$.root_url}}user/{{index $.names $index}}">{{index $.names $index}}</a></p>
+{{end}}
 {{end}}

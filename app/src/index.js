@@ -39,14 +39,7 @@ function iterateMoves(game, position) {
 
 function possibleMoves(game, position_string) {
     var position = new kokopu.Position();
-    game = game._mainVariationInfo.first;
-    for (var i = 0; i < position_string.length; i++) {
-        if (position_string[i] == "m") {
-            game = game.next;
-        } else {
-            game = game.variations[position_string[i]].first.next;
-        }
-    }
+    var game = gameAtPos(game, position_string)[0];
     var moves = [];
     moves.push(utils.movesFromMoveDescriptor(game.moveDescriptor))
     for (var i = 0; i < game.variations.length; i++) {
@@ -55,17 +48,22 @@ function possibleMoves(game, position_string) {
     return moves;
 }
 
+//returns the game and position at position_string
 function gameAtPos(game, position_string) {
-    var position = new kokopu.Position();
+    var position = game.initialPosition();
     game = game._mainVariationInfo.first;
     for (var i = 0; i < position_string.length; i++) {
+        var to_play;
         if (position_string[i] == "m") {
+            to_play = position.notation(game.moveDescriptor);
             game = game.next;
         } else {
+            to_play = position.notation(game.variations[position_string[i]].first.moveDescriptor);
             game = game.variations[position_string[i]].first.next;
         }
+        position.play(to_play);
     }
-    return game;
+    return [game,position];
 }
 window.gameAtPos = gameAtPos;
 
@@ -95,30 +93,7 @@ function allLegalMoves(game, position_string) {
 window.allLegalMoves = allLegalMoves;
 
 function setToPos(game, position_string) {
-    //if theres a number, add a extra m behind it
-    tmp = ""
-    for (var i = 0; i < position_string.length; i++) {
-        if (position_string[i] == "m") {
-            tmp += "m";
-        } else {
-            tmp += position_string[i];
-            tmp += "m";
-        }
-    }
-    position_string = tmp;
-    var position = game._initialPosition; 
-    game = game._mainVariationInfo.first;
-    for (var i = 0; i < position_string.length; i++) {
-        var to_play;
-        if (position_string[i] == "m") {
-            to_play = position.notation(game.moveDescriptor);
-            game = game.next;
-        } else {
-            to_play = position.notation(game.variations[position_string[i]].first.moveDescriptor);
-            game = game.variations[position_string[i]].first
-        }
-        position.play(to_play);
-    }
+    position = gameAtPos(game, position_string)[1]
     ground.set(consts.getChessGroundConfig(orientation, position.fen()))
 }
 
@@ -200,6 +175,10 @@ function initialize(game_number) {
     ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
     if (cards[game_number-1][pos] < consts.learn_threshold) {
         drawShapes();
+        drawCustomShapes();
+        updateComments();
+    } else {
+        clearComments();
     }
 }
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -26,7 +27,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 
 	stmt, err := h.DB.Prepare("select s.title, u.name, s.orientation from study s join user u on s.user_id == u.id where s.id == ?")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer stmt.Close()
 
@@ -44,10 +45,11 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	b["study_id"] = studyID
 	b["orientation"] = orientation
 	b["progress"] = progress
+	b["voted"] = database.UserVotedStudy(user, studyID, h.DB)
 
 	content, err := ioutil.ReadFile(utils.Env("pgn_folder") + studyID + ".pgn")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	b["pgn"] = string(content)
@@ -56,7 +58,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 }
 
 func (h *StudyHandler) SaveProgress(c echo.Context) error {
-	progress := database.EscapeString(c.FormValue("progress"))
+	progress := database.EscapeStringProgress(c.FormValue("progress"))
 	claims := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())
 
@@ -69,16 +71,45 @@ func (h *StudyHandler) SaveProgress(c echo.Context) error {
 
 	tx, err := h.DB.Begin()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	stmt, err := tx.Prepare("INSERT OR REPLACE into repetition(user_id, study_id, repetition) values(?, ?, ?)")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(database.UserIdFromName(name, h.DB), studyID, progress)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+	}
+	tx.Commit()
+
+	return c.JSON(200, "ok")
+}
+
+func (h *StudyHandler) FavoriteStudy(c echo.Context) error {
+	claims := utils.ClaimsForRender(c.Cookies())
+	studyID := studyIDFromURL(c.Request().URL.String())
+
+	name := claims["name"].(string)
+	loggedin := claims["loggedin"].(bool)
+
+	if !database.UserExists(name, h.DB) || !loggedin {
+		return echo.ErrUnauthorized
+	}
+
+	tx, err := h.DB.Begin()
+	if err != nil {
+		log.Print(err)
+	}
+	stmt, err := tx.Prepare("INSERT OR REPLACE into vote(user_id, study_id) values(?, ?)")
+	if err != nil {
+		log.Print(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(database.UserIdFromName(name, h.DB), studyID)
+	if err != nil {
+		log.Print(err)
 	}
 	tx.Commit()
 
@@ -123,23 +154,29 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	}
 	defer dst.Close()
 
+	buf := bytes.NewBuffer(nil)
+	io.Copy(buf, src)
+
+	escaped := escapeString(string(buf.Bytes()))
+	//escaped := string(buf.Bytes())
+
 	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
+	if _, err = io.Copy(dst, strings.NewReader(escaped)); err != nil {
 		return err
 	}
 
 	tx, err := h.DB.Begin()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	stmt, err := tx.Prepare("insert into study(id, user_id, title, orientation) values(?, ?, ?, ?)")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(id, database.UserIdFromName(name, h.DB), title, orientation)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	tx.Commit()
 
@@ -150,4 +187,12 @@ func studyIDFromURL(url string) string {
 	url = strings.Split(url, "?")[0]
 	split := strings.Split(url, "/")
 	return split[len(split)-1]
+}
+
+//TODO toughen this up
+func escapeString(s string) string {
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	return s
+
 }

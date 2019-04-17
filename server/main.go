@@ -65,8 +65,6 @@ func main() {
 		templates: templates,
 	}
 
-	e.GET("/", handler.HomeHandler)
-	e.POST("/", handler.HomeHandler)
 	e.GET("/login", handler.LoginGETHandler)
 	e.GET("/logout", handler.LogoutHandler)
 	e.GET("/create-study", handler.CreateStudyGETHandler)
@@ -76,12 +74,17 @@ func main() {
 	ah := &handler.AuthHandler{DB: db}
 	sh := &handler.StudyHandler{DB: db}
 	uh := &handler.UserHandler{DB: db}
+	hh := &handler.HomeHandler{DB: db}
+
+	e.GET("/", hh.HomepageHandler)
+	e.POST("/", hh.HomepageHandler)
 
 	e.POST("/register", ah.RegisterPOSTHandler)
 	e.POST("/login", ah.LoginPOSTHandler)
 
 	e.POST("/create-study", sh.CreateStudyPOSTHandler)
 	e.POST("/study/progress/*", sh.SaveProgress)
+	e.POST("/study/favorite/*", sh.FavoriteStudy)
 	e.GET("/study/*", sh.GetStudyHandler)
 
 	e.GET("/user/*", uh.UserGETHandler)

@@ -30,13 +30,26 @@ function createSelectOptions(amount, selected) {
 function submitProgress(study_id) {
     var progress = JSON.stringify(cards);
     var http = new XMLHttpRequest();
-    url = location.protocol + '//' + location.hostname + ":8000/study/progress/" + study_id;
+    var full = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+    url = full + "/study/progress/" + study_id;
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     var params = "progress=" + progress;
     http.send(params);
 }
 window.submitProgress = submitProgress;
+
+function favorite(study_id) {
+    var http = new XMLHttpRequest();
+    var full = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+    url = full + "/study/favorite/" + study_id;
+    http.open("POST", url, true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    http.send();
+    document.getElementById("favoriteButton").style.visibility = "hidden"
+}
+window.favorite = favorite;
+
 
 module.exports = {
     toAlgebraic: toAlgebraic,

@@ -62,10 +62,34 @@ function filterPossible(cards, moves, pos) {
     return tmp;
 }
 
+function updateComments() {
+    var game = gameAtPos(game_db.game(game_number-1), pos.substring(0,pos.length-1))[0];
+    var prev_comment = game.comment;
+    game = gameAtPos(game_db.game(game_number-1), pos)[0];
+    var curr_comment = game.comment;
+    if (curr_comment == prev_comment) {
+        curr_comment = "";
+    }
+    console.log(curr_comment);
+    curr_comment = curr_comment == undefined ? "" : curr_comment;
+    prev_comment = prev_comment == undefined ? "" : prev_comment;
+
+    console.log(curr_comment);
+    document.getElementById("commentary1").innerHTML = prev_comment;
+    document.getElementById("commentary2").innerHTML = curr_comment;
+}
+window.updateComments = updateComments
+
+function clearComments() {
+    document.getElementById("commentary1").innerHTML = "";
+    document.getElementById("commentary2").innerHTML = "";
+}
+window.clearComments = clearComments;
+
 //draws the shapes drawn by the pgn creator
 function drawCustomShapes() {
-    game = gameAtPos(game_db.game(game_number-1), pos.substring(0,pos.length-1));
-
+    game = gameAtPos(game_db.game(game_number-1), pos.substring(0,pos.length-1))[0];
+    
     // csl = points
     // cal = arrows
     var csl, cal;
@@ -79,7 +103,6 @@ function drawCustomShapes() {
 
     shapes = ground.state.drawable.shapes;
     for (var i in cal) {
-        console.log(cal[i])
         var color, orig, dest;
         switch(cal[i][0]) {
             case 'G':
@@ -101,7 +124,6 @@ function drawCustomShapes() {
         orig = csl[i].substring(1,3);
         shapes.push({orig:orig, brush:color});
     }
-    console.log(shapes)
     ground.setShapes(shapes);
 }
 window.drawCustomShapes = drawCustomShapes;
@@ -118,7 +140,6 @@ async function handleMove(orig, dest, metadata) {
     }
     //check if there is another move
     if (!anotherMove(cards[game_number-1], pos+tmp)) {
-        console.log("no other move")
         wrong_counter = 0;
         card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
         
@@ -141,12 +162,15 @@ async function handleMove(orig, dest, metadata) {
 
         if (cards[game_number-1][pos] < learn_threshold) {
             drawShapes();
+            drawCustomShapes();
+            updateComments();
+        } else {
+            clearComments();
         }
 
         return;
     }
     
-    console.log("theres another move: ", pos+tmp);
 
     //possible moves for the player in the position
     var move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
@@ -188,6 +212,9 @@ async function handleMove(orig, dest, metadata) {
         if (cards[game_number-1][pos] < learn_threshold) {
             drawShapes();
             drawCustomShapes();
+            updateComments();
+        } else {
+            clearComments();
         }
 
     } else {

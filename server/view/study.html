@@ -26,7 +26,11 @@ this is a description
 {{define "content"}}
 <h1>{{.study_title}}</h1>
 <section class="blue merida">
-    <div id="chessboard" class="manipulable cg-board-wrap"></div>
+    <div id="chessboard" class="chessboard manipulable cg-board-wrap"></div>
+    <div class="commentary">
+        <div id="commentary1">hi1</div>
+        <div id="commentary2">hi2</div>
+    </div>
 </section>
 <br>
 <select id="game_number" onchange="initialize(this.value)">
@@ -38,5 +42,9 @@ this is a description
 {{ else }}
     <button type="button" onclick="window.location.href='/login'">Login to save Progress</button>
 {{ end }}
+{{ if not .voted }}
+    <button type="button" onclick="favorite('{{.study_id}}')" id="favoriteButton">Favorite this study</button>
+{{ end }}
+
 <p>by: {{.creator}}</p>
 {{end}}

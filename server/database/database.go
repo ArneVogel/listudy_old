@@ -65,7 +65,8 @@ func Create_db() {
 			user_id integer, 
 			study_id text, 
 			foreign key(user_id) references user(id), 
-			foreign key(study_id) references study(id)
+			foreign key(study_id) references study(id),
+			unique(user_id, study_id)
 		);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -87,6 +88,14 @@ func file_exists(f string) bool {
 }
 
 func EscapeString(s string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return reg.ReplaceAllString(s, "")
+}
+
+func EscapeStringProgress(s string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9\\{}:,\"]+")
 	if err != nil {
 		log.Fatal(err)
@@ -116,6 +125,19 @@ func UserExists(user string, db *sql.DB) bool {
 	return id != 0
 }
 
+func UserVotedStudy(user string, study string, db *sql.DB) bool {
+	stmt, err := db.Prepare("select v.id from vote v join user u where v.user_id = u.id and v.study_id = ? and u.name = ?")
+	if err != nil {
+		log.Print(err)
+	}
+	defer stmt.Close()
+
+	var id int = 0
+	stmt.QueryRow(study, user).Scan(&id)
+
+	return id != 0
+}
+
 //assumes user exists
 func UserIdFromName(user string, db *sql.DB) int {
 	stmt, err := db.Prepare("select id from user where name = ?")
@@ -129,4 +151,37 @@ func UserIdFromName(user string, db *sql.DB) int {
 
 	return id
 
+}
+
+func TopStudies(limit int, db *sql.DB) ([]string, []int, []string, []string) {
+	stmt, err := db.Prepare("SELECT s.id, count(s.id), u.name, s.title from study s join vote v join user u where s.id = v.study_id and s.user_id = u.id group by s.id order by count(s.id) DESC limit ?;")
+	if err != nil {
+		log.Print(err)
+	}
+	defer stmt.Close()
+
+	var studyID string
+	var count int
+	var userName string
+	var title string
+	var studies []string
+	var counts []int
+	var names []string
+	var titles []string
+
+	rows, err := stmt.Query(limit)
+	if err != nil {
+		log.Print(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rows.Scan(&studyID, &count, &userName, &title)
+		studies = append(studies, studyID)
+		counts = append(counts, count)
+		names = append(names, userName)
+		titles = append(titles, title)
+	}
+
+	return studies, counts, names, titles
 }

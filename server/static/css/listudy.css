@@ -1,0 +1,9 @@
+.commentary {
+    margin-left: 2em;
+    vertical-align: top;
+    display: inline-block;
+}
+
+#chessboard {
+    display: inline-block;
+}
