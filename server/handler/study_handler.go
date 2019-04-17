@@ -45,7 +45,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	b["study_id"] = studyID
 	b["orientation"] = orientation
 	b["progress"] = progress
-	b["voted"] = database.UserVotedStudy(user, studyID, h.DB)
+	b["voted"] = database.UserVotedStudy(b["name"].(string), studyID, h.DB)
 
 	content, err := ioutil.ReadFile(utils.Env("pgn_folder") + studyID + ".pgn")
 	if err != nil {

@@ -12,7 +12,15 @@ this is a description
 
 {{define "content"}}
 <h1>{{.userProfile}}</h1>
+<h2>Studies created by {{.userProfile}}</h2>
 {{range $index, $value := .study_ids}}
 <a href="{{$.root_url}}study/{{$value}}">{{index $.study_titles $index}}</a><br>
 {{end}}
+
+<h2>Studies favorited by {{.userProfile}}</h2>
+{{range $index, $value := .favorites_ids}}
+<a href="{{$.root_url}}study/{{$value}}">{{index $.favorites_titles $index}}</a> by <a href="{{$.root_url}}user/{{index $.favorites_creator $index}}">{{index $.favorites_creator $index}}</a><br>
+{{end}}
+
+
 {{end}}

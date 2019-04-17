@@ -132,10 +132,10 @@ func UserVotedStudy(user string, study string, db *sql.DB) bool {
 	}
 	defer stmt.Close()
 
-	var id int = 0
+	var id int = -1
 	stmt.QueryRow(study, user).Scan(&id)
 
-	return id != 0
+	return id != -1
 }
 
 //assumes user exists

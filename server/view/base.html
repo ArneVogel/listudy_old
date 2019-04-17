@@ -20,11 +20,11 @@
     </head>
     <body>
         <div class="container">
+            <a href="/">Home</a>
             {{ if .loggedin }}
-                Hello {{ .name }}
-                <a href="/logout">Logout</a>
-                <a href="/create-study">create a study</a>
+                <a href="/create-study">Create a Study</a>
                 <a href="/user/{{.name}}">Profile</a>
+                <a href="/logout">Logout</a>
             {{ else }}
                 <a href="/login">Login</a>
                 <a href="/register">Register</a>
