@@ -20,7 +20,7 @@ func (h *AuthHandler) LoginPOSTHandler(c echo.Context) error {
 
 	stmt, err := h.DB.Prepare("select password, salt from user where name = ?")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 
@@ -83,16 +83,16 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 
 	tx, err := h.DB.Begin()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	stmt, err := tx.Prepare("insert into user(name, title, password, salt) values(?, ?, ?, ?)")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(username, "", hash, salt)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	tx.Commit()
 

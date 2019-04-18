@@ -27,7 +27,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 
 	stmt, err := h.DB.Prepare("select s.title, u.name, s.orientation from study s join user u on s.user_id == u.id where s.id == ?")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 
@@ -49,7 +49,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 
 	content, err := ioutil.ReadFile(utils.Env("pgn_folder") + studyID + ".pgn")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 
 	b["pgn"] = string(content)
@@ -71,16 +71,16 @@ func (h *StudyHandler) SaveProgress(c echo.Context) error {
 
 	tx, err := h.DB.Begin()
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	stmt, err := tx.Prepare("INSERT OR REPLACE into repetition(user_id, study_id, repetition) values(?, ?, ?)")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(database.UserIdFromName(name, h.DB), studyID, progress)
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	tx.Commit()
 
@@ -100,16 +100,16 @@ func (h *StudyHandler) FavoriteStudy(c echo.Context) error {
 
 	tx, err := h.DB.Begin()
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	stmt, err := tx.Prepare("INSERT OR REPLACE into vote(user_id, study_id) values(?, ?)")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(database.UserIdFromName(name, h.DB), studyID)
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	tx.Commit()
 
@@ -167,16 +167,16 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
 	tx, err := h.DB.Begin()
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	stmt, err := tx.Prepare("insert into study(id, user_id, title, orientation) values(?, ?, ?, ?)")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(id, database.UserIdFromName(name, h.DB), title, orientation)
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	tx.Commit()
 

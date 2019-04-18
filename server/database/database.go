@@ -13,7 +13,7 @@ import (
 func Create_db() {
 	db, err := sql.Open("sqlite3", utils.Env("database_name"))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -90,7 +90,7 @@ func file_exists(f string) bool {
 func EscapeString(s string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return reg.ReplaceAllString(s, "")
 }
@@ -98,7 +98,7 @@ func EscapeString(s string) string {
 func EscapeStringProgress(s string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9\\{}:,\"]+")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return reg.ReplaceAllString(s, "")
 }
@@ -106,7 +106,7 @@ func EscapeStringProgress(s string) string {
 func EscapeStringWithSpaces(s string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return reg.ReplaceAllString(s, "")
 }
@@ -115,7 +115,7 @@ func UserExists(user string, db *sql.DB) bool {
 
 	stmt, err := db.Prepare("select id from user where name = ?")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 
@@ -128,7 +128,7 @@ func UserExists(user string, db *sql.DB) bool {
 func UserVotedStudy(user string, study string, db *sql.DB) bool {
 	stmt, err := db.Prepare("select v.id from vote v join user u where v.user_id = u.id and v.study_id = ? and u.name = ?")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 
@@ -142,7 +142,7 @@ func UserVotedStudy(user string, study string, db *sql.DB) bool {
 func UserIdFromName(user string, db *sql.DB) int {
 	stmt, err := db.Prepare("select id from user where name = ?")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 

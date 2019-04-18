@@ -49,13 +49,13 @@ func studiesFromUser(user string, db *sql.DB) ([]string, []string) {
 
 	stmt, err := db.Prepare("select s.id, s.title from study as s join user as u on s.user_id == u.id where u.name = ?")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(user)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer rows.Close()
 

@@ -48,7 +48,6 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}, referer=${referer}\n",
 	}))
-
 	//serve the static data
 	e.Static("/static", "static")
 
