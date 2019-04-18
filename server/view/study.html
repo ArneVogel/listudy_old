@@ -1,9 +1,9 @@
 {{ define "title"}}
-This is the homepage
+Study {{.study_title}} - Listudy
 {{end}}
 
 {{define "description"}}
-this is a description
+Study {{.study_title}} online for free.
 {{end}}
 
 {{define "js"}}
@@ -42,7 +42,7 @@ this is a description
 {{ else }}
     <button type="button" onclick="window.location.href='/login'">Login to save Progress</button>
 {{ end }}
-{{ if not .voted }}
+{{ if and .loggedin (not .voted) }}
     <button type="button" onclick="favorite('{{.study_id}}')" id="favoriteButton">Favorite this study</button>
 {{ end }}
 
