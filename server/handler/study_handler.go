@@ -180,7 +180,7 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	}
 	tx.Commit()
 
-	return c.Redirect(303, "http://localhost:8000")
+	return c.Redirect(303, utils.Env("root_url")+"study/"+id)
 }
 
 func studyIDFromURL(url string) string {

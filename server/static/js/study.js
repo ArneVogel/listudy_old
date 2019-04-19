@@ -6673,7 +6673,6 @@ var utils = require('./utils.js');
 var handler = require('./handler.js');
 
 const learn_threshold = 2; // what value should a card have to give hints
-const base_url = "http://localhost:8000/";
 
 // https://github.com/ornicar/chessground/blob/master/src/config.ts
 var chessGroundConfig = {
@@ -6701,7 +6700,6 @@ function getChessGroundConfig(orientation, fen) {
 }
 
 module.exports = {
-    base_url: base_url,
     getChessGroundConfig: getChessGroundConfig,
     learn_threshold: learn_threshold
 }

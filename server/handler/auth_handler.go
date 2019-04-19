@@ -55,7 +55,7 @@ func (h *AuthHandler) LoginPOSTHandler(c echo.Context) error {
 	cookie.Value = t
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.SetCookie(cookie)
-	return c.Redirect(303, "http://localhost:8000")
+	return c.Redirect(303, utils.Env("root_url"))
 }
 
 func LoginGETHandler(c echo.Context) error {
@@ -67,7 +67,7 @@ func LogoutHandler(c echo.Context) error {
 	cookie.Name = "jwt"
 	cookie.Value = ""
 	c.SetCookie(cookie)
-	return c.Redirect(303, "http://localhost:8000")
+	return c.Redirect(303, utils.Env("root_url"))
 }
 
 func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
@@ -96,7 +96,7 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	}
 	tx.Commit()
 
-	return c.Redirect(303, "http://localhost:8000")
+	return c.Redirect(303, utils.Env("root_url"))
 }
 
 func RegisterGETHandler(c echo.Context) error {
