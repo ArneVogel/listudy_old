@@ -15,13 +15,13 @@ function movesFromMoveDescriptor(md) {
     return [toAlgebraic(md._from), toAlgebraic(md._to)];
 }
 
-function createSelectOptions(amount, selected) {
+function createSelectOptions(game_db, selected) {
     var select = document.getElementById("game_number");
     select.innerHTML = "";
-    for (var i = 0; i < amount; i++) {
+    for (var i = 0; i < game_db.gameCount(); i++) {
         var opt = document.createElement("option");
         opt.value = i+1;
-        opt.innerHTML = i+1;
+        opt.innerHTML = i+1 + ": " + game_db.game(i)._event;
         select.appendChild(opt);
     }
     select.selectedIndex = selected -1;

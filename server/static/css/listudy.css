@@ -2,8 +2,13 @@
     margin-left: 2em;
     vertical-align: top;
     display: inline-block;
+    max-width:300px;
 }
 
 #chessboard {
     display: inline-block;
+}
+
+.study_description {
+    white-space: pre-line;
 }

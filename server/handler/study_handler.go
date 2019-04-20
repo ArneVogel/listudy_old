@@ -25,7 +25,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	b := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())
 
-	stmt, err := h.DB.Prepare("select s.title, u.name, s.orientation from study s join user u on s.user_id == u.id where s.id == ?")
+	stmt, err := h.DB.Prepare("select s.title, u.name, s.orientation, s.description from study s join user u on s.user_id == u.id where s.id == ?")
 	if err != nil {
 		log.Println(err)
 	}
@@ -34,7 +34,8 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	var title string
 	var user string
 	var orientation string
-	stmt.QueryRow(studyID).Scan(&title, &user, &orientation)
+	var description string
+	stmt.QueryRow(studyID).Scan(&title, &user, &orientation, &description)
 
 	var progress string
 	stmt, err = h.DB.Prepare("select r.repetition from study s join user u join repetition r where u.id == s.user_id AND u.id = r.user_id and s.id = r.study_id AND u.id = ? AND s.id = ?;")
@@ -45,6 +46,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	b["study_id"] = studyID
 	b["orientation"] = orientation
 	b["progress"] = progress
+	b["description"] = description
 	b["voted"] = database.UserVotedStudy(b["name"].(string), studyID, h.DB)
 
 	content, err := ioutil.ReadFile(utils.Env("pgn_folder") + studyID + ".pgn")
@@ -120,6 +122,7 @@ func (h *StudyHandler) FavoriteStudy(c echo.Context) error {
 func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
 	title := database.EscapeStringWithSpaces(c.FormValue("title"))
+	description := database.EscapeStringWithSpacesAndNewline(c.FormValue("description"))
 	if len([]rune(title)) <= 0 {
 		return errors.New("Title cannot be empty")
 	}
@@ -169,12 +172,12 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 	}
-	stmt, err := tx.Prepare("insert into study(id, user_id, title, orientation) values(?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert into study(id, user_id, title, orientation, description) values(?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(id, database.UserIdFromName(name, h.DB), title, orientation)
+	_, err = stmt.Exec(id, database.UserIdFromName(name, h.DB), title, orientation, description)
 	if err != nil {
 		log.Println(err)
 	}

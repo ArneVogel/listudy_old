@@ -37,7 +37,8 @@ func Create_db() {
 			user_id integer not null, 
 			title text not null,
 			orientation text not null,
-			foreign key(user_id) references user(id) 
+			description text,
+			foreign key(user_id) references user(id) on delete cascade
 		);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -50,8 +51,8 @@ func Create_db() {
 			user_id integer, 
 			study_id text, 
 			repetition text, 
-			foreign key(user_id) references user(id), 
-			foreign key(study_id) references study(id),
+			foreign key(user_id) references user(id) on delete cascade, 
+			foreign key(study_id) references study(id) on delete cascade,
 			unique(user_id, study_id)
 		);
 	`
@@ -64,8 +65,8 @@ func Create_db() {
 			id integer not null primary key autoincrement,
 			user_id integer, 
 			study_id text, 
-			foreign key(user_id) references user(id), 
-			foreign key(study_id) references study(id),
+			foreign key(user_id) references user(id) on delete cascade, 
+			foreign key(study_id) references study(id) on delete cascade,
 			unique(user_id, study_id)
 		);
 	`
@@ -105,6 +106,14 @@ func EscapeStringProgress(s string) string {
 
 func EscapeStringWithSpaces(s string) string {
 	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
+	if err != nil {
+		log.Println(err)
+	}
+	return reg.ReplaceAllString(s, "")
+}
+
+func EscapeStringWithSpacesAndNewline(s string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9 \n]+")
 	if err != nil {
 		log.Println(err)
 	}

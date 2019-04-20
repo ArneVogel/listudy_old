@@ -33,6 +33,7 @@ Study {{.study_title}} online for free.
     </div>
 </section>
 <br>
+<label for="game_numer">Select Game</label>
 <select id="game_number" onchange="initialize(this.value)">
     <option value="1">1</option>
 </select>
@@ -46,5 +47,6 @@ Study {{.study_title}} online for free.
     <button type="button" onclick="favorite('{{.study_id}}')" id="favoriteButton">Favorite this study</button>
 {{ end }}
 
-<p>by: {{.creator}}</p>
+<p>This study was created by: <a href="/user/{{.creator}}">{{.creator}}</a></p>
+<p class="study_description">{{.description}}</p>
 {{end}}
