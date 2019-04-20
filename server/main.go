@@ -34,7 +34,7 @@ func main() {
 		database.Create_db()
 	}
 
-	db, err := sql.Open("sqlite3", utils.Env("database_name"))
+	db, err := sql.Open("sqlite3", utils.Env("database_name")+"?_foreign_keys=true")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,6 +60,7 @@ func main() {
 	templates["user.html"] = template.Must(template.ParseFiles("view/user.html", "view/base.html"))
 	templates["create_study.html"] = template.Must(template.ParseFiles("view/create_study.html", "view/base.html"))
 	templates["study.html"] = template.Must(template.ParseFiles("view/study.html", "view/base.html"))
+	templates["settings.html"] = template.Must(template.ParseFiles("view/settings.html", "view/base.html"))
 
 	for _, v := range static_pages {
 		templates[v+".html"] = template.Must(template.ParseFiles("view/"+v+".html", "view/base.html"))
@@ -74,12 +75,14 @@ func main() {
 	e.GET("/logout", handler.LogoutHandler)
 	e.GET("/create-study", handler.CreateStudyGETHandler)
 	e.GET("/register", handler.RegisterGETHandler)
+	e.GET("/settings", handler.SettingsGETHandler)
 
 	// for making the db connection avaliable in the handler
 	ah := &handler.AuthHandler{DB: db}
 	sh := &handler.StudyHandler{DB: db}
 	uh := &handler.UserHandler{DB: db}
 	hh := &handler.HomeHandler{DB: db}
+	seh := &handler.SettingsHandler{DB: db}
 
 	e.GET("/", hh.HomepageHandler)
 	e.POST("/", hh.HomepageHandler)
@@ -93,6 +96,9 @@ func main() {
 	e.GET("/study/*", sh.GetStudyHandler)
 
 	e.GET("/user/*", uh.UserGETHandler)
+
+	e.POST("/change-password", seh.ChangePasswordHandler)
+	e.POST("/delete-account", seh.DeleteAccount)
 
 	e.Logger.Fatal(e.Start(":" + utils.Env("port")))
 }

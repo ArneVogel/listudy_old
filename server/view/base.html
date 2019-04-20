@@ -24,6 +24,7 @@
             {{ if .loggedin }}
                 <a href="/create-study">Create a Study</a>
                 <a href="/user/{{.name}}">Profile</a>
+                <a href="/settings">Settings</a>
                 <a href="/logout">Logout</a>
             {{ else }}
                 <a href="/login">Login</a>
@@ -34,5 +35,13 @@
             {{template "content" . }}
         </div>
         {{template "afterBodyJS" .}}
+        <hr>
+        <div class="container">
+            <a href="/privacy">Privacy</a>
+            <a href="/tos">Terms of Service</a>
+            <a href="/faq">FAQ</a>
+            <a href="/about">About</a>
+            <a href="https://github.com/ArneVogel/listudy">Github</a>
+        </div>
     </body>
 </html>

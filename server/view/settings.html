@@ -1,0 +1,30 @@
+{{ define "title"}}
+User Settings
+{{end}}
+
+{{define "description"}}
+User Settings
+{{end}}
+
+{{define "js"}}{{end}}
+{{define "css"}}{{end}}
+{{define "afterBodyJS"}}{{end}}
+
+
+{{define "content"}}
+<h1>Settings</h1>
+<h2>Change Password</h2>
+<form action="/change-password" method="POST" enctype="multipart/form-data">
+    <label for="currpass">Current Password</label>
+    <input type="text" id="currpass" name="currpass"><br>
+    <label for="newpass">New Password</label>
+    <input type="text" id="newpass" name="newpass"><br>
+    <input type="submit" value="Submit">
+</form>
+<h2>Delete Account</h2>
+<form action="/delete-account" method="POST" enctype="multipart/form-data">
+    <p>This can NOT be undone.</p>
+    <input type="submit" value="Submit">
+</form>
+
+{{end}}
