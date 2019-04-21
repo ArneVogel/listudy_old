@@ -26,6 +26,8 @@ func (h *UserHandler) UserGETHandler(c echo.Context) error {
 	b["study_ids"] = study_ids
 	b["study_titles"] = study_titles
 
+	b["delete_option"] = userProfile == b["name"].(string)
+
 	//studies favorited by the user
 	study_ids, study_titles, study_creator := favoriteStudies(database.UserIdFromName(userProfile, h.DB), h.DB)
 	b["favorites_ids"] = study_ids

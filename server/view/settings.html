@@ -19,12 +19,12 @@ User Settings
     <input type="text" id="currpass" name="currpass"><br>
     <label for="newpass">New Password</label>
     <input type="text" id="newpass" name="newpass"><br>
-    <input type="submit" value="Submit">
+    <input type="submit" value="Change Password">
 </form>
 <h2>Delete Account</h2>
-<form action="/delete-account" method="POST" enctype="multipart/form-data">
-    <p>This can NOT be undone.</p>
-    <input type="submit" value="Submit">
+<form action="/delete-account" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Do you really want to DELETE you account? This can NOT be undone!');">
+    <p>This can NOT be undone. This will also delete all the studies you created</p>
+    <input type="submit" value="DELETE">
 </form>
 
 {{end}}

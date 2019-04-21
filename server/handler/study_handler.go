@@ -59,6 +59,50 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "study.html", b)
 }
 
+func (h *StudyHandler) DeleteStudy(c echo.Context) error {
+	claims := utils.ClaimsForRender(c.Cookies())
+	name := claims["name"].(string)
+	loggedin := claims["loggedin"].(bool)
+
+	if !database.UserExists(name, h.DB) || !loggedin {
+		return echo.ErrUnauthorized
+	}
+
+	studyID := studyIDFromURL(c.Request().URL.String())
+
+	//make sure the logged in "name" is the creator of the study (user)
+	stmt, err := h.DB.Prepare("select u.name from study s join user u on s.user_id == u.id where s.id == ?")
+	if err != nil {
+		log.Println(err)
+	}
+	defer stmt.Close()
+
+	var user string
+	stmt.QueryRow(studyID).Scan(&user)
+
+	if user != name {
+		return echo.ErrUnauthorized
+	}
+
+	//delete the study
+	tx, err := h.DB.Begin()
+	if err != nil {
+		log.Println(err)
+	}
+	stmt, err = tx.Prepare("DELETE from study WHERE id = ?")
+	if err != nil {
+		log.Println(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(studyID)
+	if err != nil {
+		log.Println(err)
+	}
+	tx.Commit()
+
+	return c.Redirect(303, utils.Env("root_url")+"user/"+name)
+}
+
 func (h *StudyHandler) SaveProgress(c echo.Context) error {
 	progress := database.EscapeStringProgress(c.FormValue("progress"))
 	claims := utils.ClaimsForRender(c.Cookies())

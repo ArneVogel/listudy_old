@@ -94,6 +94,7 @@ func main() {
 	e.POST("/study/progress/*", sh.SaveProgress)
 	e.POST("/study/favorite/*", sh.FavoriteStudy)
 	e.GET("/study/*", sh.GetStudyHandler)
+	e.POST("/delete-study/*", sh.DeleteStudy)
 
 	e.GET("/user/*", uh.UserGETHandler)
 
