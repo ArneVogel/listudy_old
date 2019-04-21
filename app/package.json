@@ -10,6 +10,6 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "chessground": "^7.3.5",
-    "kokopu": "^1.2.2"
+    "kokopu": "^1.2.4"
   }
 }
