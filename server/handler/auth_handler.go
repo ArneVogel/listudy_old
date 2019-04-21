@@ -95,6 +95,27 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	}
 	tx.Commit()
 
+	// Create token
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// Set claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["username"] = username
+	claims["loggedin"] = true
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte(utils.Env("secret")))
+	if err != nil {
+		return err
+	}
+
+	cookie := new(http.Cookie)
+	cookie.Name = "jwt"
+	cookie.Value = t
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.SetCookie(cookie)
+
 	return c.Redirect(303, utils.Env("root_url"))
 }
 
