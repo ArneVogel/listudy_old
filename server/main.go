@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"os"
 
 	"./database"
 	"./handler"
@@ -45,8 +46,14 @@ func main() {
 	e.Debug = true
 
 	//logger
+	logTo := os.Stdout
+	//if in the .env something not equal to stdout is given log to the file instead
+	if utils.Env("log") != "stdout" {
+		logTo, _ = os.OpenFile(utils.Env("log"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+	}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}, referer=${referer}\n",
+		Output: logTo,
 	}))
 	//serve the static data
 	e.Static("/static", "static")
