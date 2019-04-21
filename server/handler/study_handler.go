@@ -166,7 +166,7 @@ func (h *StudyHandler) FavoriteStudy(c echo.Context) error {
 func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 
 	title := database.EscapeStringWithSpaces(c.FormValue("title"))
-	description := database.EscapeStringWithSpacesAndNewline(c.FormValue("description"))
+	description := database.EscapeStringDescription(c.FormValue("description"))
 	if len([]rune(title)) <= 0 {
 		return errors.New("Title cannot be empty")
 	}

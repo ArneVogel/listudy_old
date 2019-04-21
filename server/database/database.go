@@ -112,8 +112,8 @@ func EscapeStringWithSpaces(s string) string {
 	return reg.ReplaceAllString(s, "")
 }
 
-func EscapeStringWithSpacesAndNewline(s string) string {
-	reg, err := regexp.Compile("[^a-zA-Z0-9 \n]+")
+func EscapeStringDescription(s string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9 \n:/?&.]+")
 	if err != nil {
 		log.Println(err)
 	}
