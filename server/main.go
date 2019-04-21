@@ -52,7 +52,7 @@ func main() {
 		logTo, _ = os.OpenFile(utils.Env("log"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 	}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}, referer=${referer}\n",
+		Format: `{"time"="${time_rfc3339}", "method"="${method}", "uri"="${uri}", "status"=${status}, "referer"="${referer}"}` + "\n",
 		Output: logTo,
 	}))
 	//serve the static data
