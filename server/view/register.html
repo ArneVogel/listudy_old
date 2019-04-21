@@ -6,14 +6,16 @@ Register
 Register
 {{end}}
 
-{{define "js"}}{{end}}
+{{define "js"}}
+    <script src="/static/js/register.js" type="text/javascript"></script>
+{{end}}
 {{define "css"}}{{end}}
 {{define "afterBodyJS"}}{{end}}
 
 
 {{define "content"}}
 <h1>Register</h1>
-<form action="/register" method="POST">
+<form action="/register" method="POST" onsubmit="validate()"> 
     <input type="text" name="username" placeholder="Username"><br>
     <input type="password" name="password" placeholder="Password"><br>
     <input type="submit" value="Submit">
