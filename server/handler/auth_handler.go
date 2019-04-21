@@ -40,7 +40,6 @@ func (h *AuthHandler) LoginPOSTHandler(c echo.Context) error {
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
-	claims["title"] = "GM"
 	claims["loggedin"] = true
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 

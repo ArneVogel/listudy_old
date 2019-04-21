@@ -14,8 +14,8 @@ Create studies for effective chess learning.
 {{define "content"}}
 <h1>Create a Study</h1>
 <form action="/create-study" method="POST" enctype="multipart/form-data">
-    <label for="title">Study Title</label>
     <p>Only upload PGN's you have the rights to.</p>
+    <label for="title">Study Title</label>
     <input type="text" id="title" name="title" placeholder="A01 Nimzo Larsen Opening"><br>
     <label for="pgn">PGN file</label>
     <input type="file" id="pgn" name="pgn"><br>
@@ -25,6 +25,7 @@ Create studies for effective chess learning.
         <option value="white">White</option>
         <option value="black">Black</option>
     </select>
+    <p>With submitting you agree to publish the PGN to the public and to license your work under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>, for more information see the <a href="/tos#publishing_studies">Terms of Service</a></p>
     <input type="submit" value="Submit">
 </form>
 {{end}}

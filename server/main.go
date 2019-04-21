@@ -51,7 +51,6 @@ func main() {
 	//serve the static data
 	e.Static("/static", "static")
 
-	static_pages := []string{"privacy"}
 	//templates
 	templates := make(map[string]*template.Template)
 	templates["home.html"] = template.Must(template.ParseFiles("view/home.html", "view/base.html"))
@@ -62,6 +61,7 @@ func main() {
 	templates["study.html"] = template.Must(template.ParseFiles("view/study.html", "view/base.html"))
 	templates["settings.html"] = template.Must(template.ParseFiles("view/settings.html", "view/base.html"))
 
+	static_pages := []string{"privacy", "tos"}
 	for _, v := range static_pages {
 		templates[v+".html"] = template.Must(template.ParseFiles("view/"+v+".html", "view/base.html"))
 		e.GET("/"+v, handler.StaticPageHandler)

@@ -12,6 +12,8 @@ Improve your chess game with spaced repetition. Effectively learn openings and e
 
 {{define "content"}}
 <h1>Listudy - Spaced Repetition for Chess</h1>
+<h2>What is Listudy</h2>
+<p>Listudy allows you to use <a href="https://en.wikipedia.org/wiki/Spaced_repetition">spaced repetition</a> to study opening repertoires, endgames and everything else you can express in a PGN.</p>
 <h2>Popular Studies</h2>
 {{range $index, $value := .studies}}
 <p>Votes: {{index $.counts $index}}; <a href="{{$.root_url}}study/{{$value}}">{{index $.titles $index}}</a> by <a href="{{$.root_url}}user/{{index $.names $index}}">{{index $.names $index}}</a></p>

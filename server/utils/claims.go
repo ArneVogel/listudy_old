@@ -11,7 +11,6 @@ func EmptyClaim() jwt.MapClaims {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = ""
-	claims["title"] = ""
 	claims["loggedin"] = false
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 	return claims
@@ -28,7 +27,6 @@ func ClaimsForRender(cookies []*http.Cookie) map[string]interface{} {
 	}
 	return map[string]interface{}{
 		"name":     claims["username"],
-		"title":    claims["title"],
 		"loggedin": claims["loggedin"],
 		"root_url": Env("root_url"),
 	}
