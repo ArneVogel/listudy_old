@@ -122,7 +122,7 @@ func EscapeStringDescription(s string) string {
 
 func UserExists(user string, db *sql.DB) bool {
 
-	stmt, err := db.Prepare("select id from user where name = ?")
+	stmt, err := db.Prepare("select id from user where LOWER(name) = LOWER(?)")
 	if err != nil {
 		log.Println(err)
 	}
