@@ -54,7 +54,7 @@ func main() {
 
 	//if in the .env something not equal to stdout is given log to the file instead
 	if utils.Env("log_prefix") != "stdout" || utils.Env("log_suffix") != "stdout" {
-		logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_prefix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+		logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 
 		//check if the date has changed and update the log output file accordingly
 		ticker := time.NewTicker(60 * time.Second)
@@ -65,7 +65,7 @@ func main() {
 					dt := time.Now()
 					if dt.Format(dateFormatString) != date || true {
 						date = dt.Format("01-02-2006")
-						logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_prefix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+						logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 						e.Logger.SetOutput(logTo)
 					}
 				}
