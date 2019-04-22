@@ -19,19 +19,18 @@ func (h *AuthHandler) LoginPOSTHandler(c echo.Context) error {
 	username := database.EscapeString(c.FormValue("username"))
 	password := database.EscapeString(c.FormValue("password"))
 
-	stmt, err := h.DB.Prepare("select password, salt from user where name = ?")
+	stmt, err := h.DB.Prepare("select password from user where name = ?")
 	if err != nil {
 		log.Println(err)
 	}
 	defer stmt.Close()
 
 	var passwordHash string
-	var salt string
 
-	stmt.QueryRow(username).Scan(&passwordHash, &salt)
+	stmt.QueryRow(username).Scan(&passwordHash)
 
 	// Throws unauthorized error
-	if !utils.PasswordEqualsHash(password, salt, passwordHash) {
+	if !utils.CheckPasswordHash(password, passwordHash) {
 		return echo.ErrUnauthorized
 	}
 
@@ -73,7 +72,6 @@ func LogoutHandler(c echo.Context) error {
 func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	username := database.EscapeString(c.FormValue("username"))
 	password := database.EscapeString(c.FormValue("password"))
-	salt := utils.Salt(20)
 
 	if username == "" {
 		return errors.New("Please only use alphanumerical characters in the username.")
@@ -87,18 +85,18 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 		return errors.New("You must enter a password.")
 	}
 
-	hash := utils.Hash(password, salt)
+	hash, _ := utils.Hash(password)
 
 	tx, err := h.DB.Begin()
 	if err != nil {
 		log.Println(err)
 	}
-	stmt, err := tx.Prepare("insert into user(name, title, password, salt) values(?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert into user(name, title, password) values(?, ?, ?)")
 	if err != nil {
 		log.Println(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(username, "", hash, salt)
+	_, err = stmt.Exec(username, "", hash)
 	if err != nil {
 		log.Println(err)
 	}

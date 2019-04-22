@@ -23,7 +23,6 @@ func Create_db() {
 		name text unique,
 		title text,
 		password text,
-		salt text,
 		created date default CURRENT_DATE
 		);
 	`

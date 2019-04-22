@@ -25,19 +25,18 @@ func (h *SettingsHandler) ChangePasswordHandler(c echo.Context) error {
 	currpass := database.EscapeString(c.FormValue("currpass"))
 	newpass := database.EscapeString(c.FormValue("newpass"))
 
-	stmt, err := h.DB.Prepare("select password, salt from user where name = ?")
+	stmt, err := h.DB.Prepare("select password from user where name = ?")
 	if err != nil {
 		log.Println(err)
 	}
 	defer stmt.Close()
 
 	var passwordHash string
-	var salt string
 
-	stmt.QueryRow(name).Scan(&passwordHash, &salt)
+	stmt.QueryRow(name).Scan(&passwordHash)
 
 	// Throws unauthorized error
-	if !utils.PasswordEqualsHash(currpass, salt, passwordHash) {
+	if !utils.CheckPasswordHash(currpass, passwordHash) {
 		return echo.ErrUnauthorized
 	}
 
@@ -51,7 +50,7 @@ func (h *SettingsHandler) ChangePasswordHandler(c echo.Context) error {
 	}
 	defer stmt.Close()
 
-	hash := utils.Hash(newpass, salt)
+	hash, _ := utils.Hash(newpass)
 	_, err = stmt.Exec(hash, name)
 	if err != nil {
 		log.Println(err)
