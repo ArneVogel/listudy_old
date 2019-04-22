@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"./database"
 	"./handler"
@@ -47,14 +48,36 @@ func main() {
 
 	//logger
 	logTo := os.Stdout
+	dt := time.Now()
+	dateFormatString := "2006-02-01" // YYYY-MM-DD
+	date := dt.Format(dateFormatString)
+
 	//if in the .env something not equal to stdout is given log to the file instead
-	if utils.Env("log") != "stdout" {
-		logTo, _ = os.OpenFile(utils.Env("log"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+	if utils.Env("log_prefix") != "stdout" || utils.Env("log_suffix") != "stdout" {
+		logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+
+		//check if the date has changed and update the log output file accordingly
+		ticker := time.NewTicker(60 * time.Second)
+		go func() {
+			for {
+				select {
+				case <-ticker.C:
+					dt := time.Now()
+					if dt.Format(dateFormatString) != date || true {
+						date = dt.Format(dateFormatString)
+						logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+						e.Logger.SetOutput(logTo)
+					}
+				}
+			}
+		}()
+
 	}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `{"time"="${time_rfc3339}", "method"="${method}", "uri"="${uri}", "status"=${status}, "referer"="${referer}"}` + "\n",
+		Format: `{"time":"${time_rfc3339}", "method":"${method}", "uri":"${uri}", "status":${status}, "referer":"${referer}"}` + "\n",
 		Output: logTo,
 	}))
+
 	//serve the static data
 	e.Static("/static", "static")
 
