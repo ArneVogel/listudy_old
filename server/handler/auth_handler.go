@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"time"
-	"errors"
 
 	"../database"
 	"../utils"
@@ -74,6 +74,10 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	username := database.EscapeString(c.FormValue("username"))
 	password := database.EscapeString(c.FormValue("password"))
 	salt := utils.Salt(20)
+
+	if username == "" {
+		return errors.New("Please only use alphanumerical characters in the username.")
+	}
 
 	if database.UserExists(username, h.DB) {
 		return errors.New("That user already exists.")
