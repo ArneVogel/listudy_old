@@ -12,6 +12,7 @@
 
 {{define "content"}}
 <h1>{{.userProfile}}</h1>
+{{ if .study_ids }}
 <h2>Studies created by {{.userProfile}}</h2>
 {{/* cannot use .delete_option inside the range*/}}
 {{ $delete_option := .delete_option}}
@@ -23,6 +24,10 @@
 </form>
 {{end}}
 <br>
+{{end}}
+{{end}}
+{{ if not .study_ids }}
+<h2>{{.userProfile}} has not created any studies :(</h2>
 {{end}}
 
 <h2>Studies favorited by {{.userProfile}}</h2>
