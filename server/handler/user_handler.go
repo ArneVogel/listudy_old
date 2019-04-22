@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"log"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -17,6 +18,9 @@ func (h *UserHandler) UserGETHandler(c echo.Context) error {
 	r := c.Request()
 	urlString := r.URL.String()
 	userProfile := userFromURL(urlString)
+	if !database.UserExists(userProfile, h.DB) {
+		return errors.New("User does not exist.")
+	}
 
 	b := utils.ClaimsForRender(c.Cookies())
 	b["userProfile"] = userProfile
