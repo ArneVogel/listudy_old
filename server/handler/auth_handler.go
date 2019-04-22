@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"errors"
 
 	"../database"
 	"../utils"
@@ -75,7 +76,11 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	salt := utils.Salt(20)
 
 	if database.UserExists(username, h.DB) {
-		return echo.ErrUnauthorized
+		return errors.New("That user already exists.")
+	}
+
+	if password == "" {
+		return errors.New("You must enter a password.")
 	}
 
 	hash := utils.Hash(password, salt)
