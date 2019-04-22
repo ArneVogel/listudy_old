@@ -46,6 +46,7 @@ Study {{.study_title}} online for free.
 {{ if and .loggedin (not .voted) }}
     <button type="button" onclick="favorite('{{.study_id}}')" id="favoriteButton">Favorite this study</button>
 {{ end }}
+    <button type="button" onclick="toggleHelp()" id="help">Disable help</button>
 
 <p>This study was created by: <a href="/user/{{.creator}}">{{.creator}}</a></p>
 <p class="study_description">{{.description}}</p>

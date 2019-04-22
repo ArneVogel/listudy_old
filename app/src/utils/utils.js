@@ -50,6 +50,19 @@ function favorite(study_id) {
 }
 window.favorite = favorite;
 
+function toggleHelp() {
+    window.help = !help;
+    if (window.help) {
+        drawShapes();
+        drawCustomShapes();
+        updateComments();
+        document.getElementById("help").innerHTML = "Disable help";
+    } else {
+        document.getElementById("help").innerHTML = "Enable help";
+    }
+}
+window.toggleHelp = toggleHelp;
+
 
 module.exports = {
     toAlgebraic: toAlgebraic,

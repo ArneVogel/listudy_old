@@ -6636,6 +6636,7 @@ function createCards() {
 }
 
 function initialize(game_number) {
+    window.help = true;
     window.game_number = game_number;
     window.wrong_counter = 0;
     window.learn_threshold = consts.learn_threshold;
@@ -6657,7 +6658,7 @@ function initialize(game_number) {
     utils.createSelectOptions(game_db, game_number);
     
     ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
-    if (cards[game_number-1][pos] < consts.learn_threshold) {
+    if (window.help && cards[game_number-1][pos] < consts.learn_threshold) {
         drawShapes();
         drawCustomShapes();
         updateComments();
@@ -6874,7 +6875,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
         ground.state.turnColor = orientation; 
 
-        if (cards[game_number-1][pos] < learn_threshold) {
+        if (window.help && cards[game_number-1][pos] < learn_threshold) {
             drawShapes();
             drawCustomShapes();
             updateComments();
@@ -6923,7 +6924,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
         ground.state.turnColor = orientation; 
 
-        if (cards[game_number-1][pos] < learn_threshold) {
+        if (window.help && cards[game_number-1][pos] < learn_threshold) {
             drawShapes();
             drawCustomShapes();
             updateComments();
@@ -7008,6 +7009,19 @@ function favorite(study_id) {
     document.getElementById("favoriteButton").style.visibility = "hidden"
 }
 window.favorite = favorite;
+
+function toggleHelp() {
+    window.help = !help;
+    if (window.help) {
+        drawShapes();
+        drawCustomShapes();
+        updateComments();
+        document.getElementById("help").innerHTML = "Disable help";
+    } else {
+        document.getElementById("help").innerHTML = "Enable help";
+    }
+}
+window.toggleHelp = toggleHelp;
 
 
 module.exports = {
