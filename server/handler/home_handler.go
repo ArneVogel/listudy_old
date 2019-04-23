@@ -11,7 +11,7 @@ import (
 type HomeHandler utils.Handler
 
 func (h *HomeHandler) HomepageHandler(c echo.Context) error {
-	studies, counts, names, titles := database.TopStudies(20, h.DB)
+	studies, counts, names, titles := database.TopStudies("", 20, h.DB)
 	claims := utils.ClaimsForRender(c.Cookies())
 	claims["studies"] = studies
 	claims["counts"] = counts

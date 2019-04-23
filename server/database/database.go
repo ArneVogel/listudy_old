@@ -38,6 +38,7 @@ func Create_db() {
 			title text not null,
 			orientation text not null,
 			description text,
+			created date default CURRENT_TIMESTAMP,
 			foreign key(user_id) references user(id) on delete cascade
 		);
 	`
@@ -162,8 +163,8 @@ func UserIdFromName(user string, db *sql.DB) int {
 
 }
 
-func TopStudies(limit int, db *sql.DB) ([]string, []int, []string, []string) {
-	stmt, err := db.Prepare("SELECT s.id, count(s.id), u.name, s.title from study s join vote v join user u where s.id = v.study_id and s.user_id = u.id group by s.id order by count(s.id) DESC limit ?;")
+func TopStudies(includes string, limit int, db *sql.DB) ([]string, []int, []string, []string) {
+	stmt, err := db.Prepare("SELECT s.id, count(s.id), u.name, s.title from study s join vote v join user u where s.id = v.study_id and s.user_id = u.id and s.title like '%' || ? || '%' group by s.id order by count(s.id) DESC limit ?;")
 	if err != nil {
 		log.Print(err)
 	}
@@ -178,7 +179,7 @@ func TopStudies(limit int, db *sql.DB) ([]string, []int, []string, []string) {
 	var names []string
 	var titles []string
 
-	rows, err := stmt.Query(limit)
+	rows, err := stmt.Query(includes, limit)
 	if err != nil {
 		log.Print(err)
 	}
@@ -193,4 +194,59 @@ func TopStudies(limit int, db *sql.DB) ([]string, []int, []string, []string) {
 	}
 
 	return studies, counts, names, titles
+}
+
+func NewestStudies(includes string, limit int, db *sql.DB) ([]string, []int, []string, []string) {
+	stmt, err := db.Prepare("SELECT s.id, u.name, s.title from study s join vote v join user u where s.user_id = u.id and s.title like '%' || ? || '%' group by s.id order by s.created DESC limit ?;")
+	if err != nil {
+		log.Print(err)
+	}
+	defer stmt.Close()
+
+	var studyID string
+	var userName string
+	var title string
+	var studies []string
+	var counts []int
+	var names []string
+	var titles []string
+
+	rows, err := stmt.Query(includes, limit)
+	if err != nil {
+		log.Print(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rows.Scan(&studyID, &userName, &title)
+		studies = append(studies, studyID)
+		counts = append(counts, Votes(studyID, db))
+		names = append(names, userName)
+		titles = append(titles, title)
+	}
+
+	return studies, counts, names, titles
+}
+
+func Votes(studyID string, db *sql.DB) (int) {
+	stmt, err := db.Prepare("SELECT count() FROM vote WHERE vote.study_id = ?;")
+	if err != nil {
+		log.Print(err)
+	}
+	defer stmt.Close()
+
+	var count int
+	var counts []int
+
+	rows, err := stmt.Query(studyID)
+	if err != nil {
+		log.Print(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rows.Scan(&count)
+		counts = append(counts, count)
+	}
+	return counts[0]
 }

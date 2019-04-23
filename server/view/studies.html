@@ -1,0 +1,45 @@
+{{ define "title" }}
+Studies
+{{end}}
+
+{{define "description"}}
+Studies list.
+{{end}}
+
+{{define "js"}}{{end}}
+{{define "css"}}
+<style>
+div.study-search-bar * {
+	display: inline;
+	margin: 0.25rem;
+}
+
+input.search {
+	line-height: 2rem;
+	border-radius: 5px;
+	float: right;
+	outline: none;
+}
+
+select.search-options {
+	height: 2rem;
+	float: right;
+}
+</style>
+{{end}}
+{{define "afterBodyJS"}}{{end}}
+{{define "content"}}
+<div class="study-search-bar">
+	<h1>Studies</h1>
+	<form action="/studies" method="GET">
+		<select name="sortby" class="search-options">
+			<option value="newest" {{if eq $.sortby "newest"}}selected{{end}}>Newest</option>
+			<option value="mostvotes" {{if eq $.sortby "mostvotes"}}selected{{end}}>Most Votes</option>
+		</select>
+		<input name="query" class="search" placeholder="Search for a study.." value="{{$.query}}"></input>
+	</form>
+</div>
+{{range $index, $value := .studies}}
+<p>Votes: {{index $.counts $index}}; <a href="{{$.root_url}}study/{{$value}}">{{index $.titles $index}}</a> by <a href="{{$.root_url}}user/{{index $.names $index}}">{{index $.names $index}}</a></p>
+{{end}}
+{{end}}
