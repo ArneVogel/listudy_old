@@ -123,7 +123,7 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.SetCookie(cookie)
 
-	return c.Redirect(303, utils.Env("root_url"))
+	return c.Redirect(303, utils.Env("root_url")+"thanks-for-registering")
 }
 
 func RegisterGETHandler(c echo.Context) error {
