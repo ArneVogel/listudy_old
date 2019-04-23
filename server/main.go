@@ -90,6 +90,7 @@ func main() {
 	templates["create_study.html"] = template.Must(template.ParseFiles("view/create_study.html", "view/base.html"))
 	templates["study.html"] = template.Must(template.ParseFiles("view/study.html", "view/base.html"))
 	templates["settings.html"] = template.Must(template.ParseFiles("view/settings.html", "view/base.html"))
+	templates["studies.html"] = template.Must(template.ParseFiles("view/studies.html", "view/base.html"))
 
 	static_pages := []string{"privacy", "tos"}
 	for _, v := range static_pages {
@@ -113,6 +114,7 @@ func main() {
 	uh := &handler.UserHandler{DB: db}
 	hh := &handler.HomeHandler{DB: db}
 	seh := &handler.SettingsHandler{DB: db}
+	sdh := &handler.StudiesHandler{DB: db}
 
 	e.GET("/", hh.HomepageHandler)
 	e.POST("/", hh.HomepageHandler)
@@ -127,6 +129,8 @@ func main() {
 	e.POST("/delete-study/*", sh.DeleteStudy)
 
 	e.GET("/user/*", uh.UserGETHandler)
+
+	e.GET("studies", sdh.StudiesGETHandler)
 
 	e.POST("/change-password", seh.ChangePasswordHandler)
 	e.POST("/delete-account", seh.DeleteAccount)
