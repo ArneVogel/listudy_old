@@ -84,6 +84,11 @@ func (h *AuthHandler) RegisterPOSTHandler(c echo.Context) error {
 	if password == "" {
 		return errors.New("You must enter a password.")
 	}
+	if len(username) >= 20 {
+		return errors.New("The username may not be longer than 20 characters.")
+	} else if len(username) <= 2 {
+		return errors.New("The username may not be shorter than 3 characters.")
+	}
 
 	hash, _ := utils.Hash(password)
 
