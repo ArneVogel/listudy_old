@@ -214,6 +214,7 @@ async function handleMove(orig, dest, metadata) {
         } else {
             clearComments();
         }
+        updateProgress();
 
     } else {
         wrong_counter += 1;
@@ -231,6 +232,7 @@ async function handleMove(orig, dest, metadata) {
             drawShapes();
             drawCustomShapes();
         }
+        updateProgress();
     }
 
 }

@@ -6648,7 +6648,6 @@ function initialize(game_number) {
         window.cards = JSON.parse(progress);
     }
 
-
     //set the position to the smallest position
     window.pos = smallestPos(window.cards[game_number-1]);
     setToPos(game_db.game(game_number-1), window.pos);
@@ -6657,6 +6656,7 @@ function initialize(game_number) {
     utils.createSelectOptions(game_db, game_number);
     
     ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+    updateProgress();
     if (window.help && cards[game_number-1][pos] < consts.learn_threshold) {
         drawShapes();
         drawCustomShapes();
@@ -6928,6 +6928,7 @@ async function handleMove(orig, dest, metadata) {
         } else {
             clearComments();
         }
+        updateProgress();
 
     } else {
         wrong_counter += 1;
@@ -6945,6 +6946,7 @@ async function handleMove(orig, dest, metadata) {
             drawShapes();
             drawCustomShapes();
         }
+        updateProgress();
     }
 
 }
@@ -7023,6 +7025,29 @@ function toggleHelp() {
 }
 window.toggleHelp = toggleHelp;
 
+function updateProgress() {
+    spanPercent = document.getElementById("progress");
+
+    total = 0;
+    learned = 0;
+    cardsInBox = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0};
+    for (var i = 0; i < Object.keys(cards).length; i++) {
+        total += Object.keys(cards[i]).length * 6;
+
+        for (var j of Object.keys(cards[i])) {
+            learned += cards[i][j];
+            cardsInBox[cards[i][j]] += 1;
+        }
+    }
+
+    percentage = Math.round((learned/total)*100)/100;
+    spanPercent.innerHTML = percentage;
+
+    for (var i = 0; i < 6; i++) {
+        document.getElementById("box"+(i+1)).innerHTML = cardsInBox[i]
+    }
+}
+window.updateProgress = updateProgress;
 
 module.exports = {
     toAlgebraic: toAlgebraic,

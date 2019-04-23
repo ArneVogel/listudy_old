@@ -19,3 +19,7 @@
 .navbar a:first-child {
     padding-left: 0px;
 }
+
+.study_stats td {
+    padding: 0px;
+}

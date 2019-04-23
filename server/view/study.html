@@ -38,6 +38,40 @@ Study {{.study_title}} online for free.
     <option value="1">1</option>
 </select>
 <br>
+<div class="study_stats">
+ <table>
+  <tr>
+    <th>Box</th>
+    <th># Cards</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><span id="box1"></span></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><span id="box2"></span></td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><span id="box3"></span></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><span id="box4"></span></td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td><span id="box5"></span></td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td><span id="box6"></span></td>
+  </tr>
+
+</table> 
+<p>Study progress: <span id="progress">0</span>%</p>
+</div>
 {{ if .loggedin }}
     <button type="button" onclick="submitProgress('{{.study_id}}')">Submit Progress</button>
 {{ else }}
