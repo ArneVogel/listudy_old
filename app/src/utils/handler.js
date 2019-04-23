@@ -70,11 +70,9 @@ function updateComments() {
     if (curr_comment == prev_comment) {
         curr_comment = "";
     }
-    console.log(curr_comment);
     curr_comment = curr_comment == undefined ? "" : curr_comment;
     prev_comment = prev_comment == undefined ? "" : prev_comment;
 
-    console.log(curr_comment);
     document.getElementById("commentary1").innerHTML = prev_comment;
     document.getElementById("commentary2").innerHTML = curr_comment;
 }

@@ -6648,7 +6648,6 @@ function initialize(game_number) {
         window.cards = JSON.parse(progress);
     }
 
-    console.log(orientation)
 
     //set the position to the smallest position
     window.pos = smallestPos(window.cards[game_number-1]);
@@ -6785,11 +6784,9 @@ function updateComments() {
     if (curr_comment == prev_comment) {
         curr_comment = "";
     }
-    console.log(curr_comment);
     curr_comment = curr_comment == undefined ? "" : curr_comment;
     prev_comment = prev_comment == undefined ? "" : prev_comment;
 
-    console.log(curr_comment);
     document.getElementById("commentary1").innerHTML = prev_comment;
     document.getElementById("commentary2").innerHTML = curr_comment;
 }
@@ -7006,7 +7003,10 @@ function favorite(study_id) {
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     http.send();
-    document.getElementById("favoriteButton").style.visibility = "hidden"
+    button = document.getElementById("favoriteButton");
+    button.style.visibility = "hidden"
+    button.style.width = 0;
+    button.style.padding = 0;
 }
 window.favorite = favorite;
 

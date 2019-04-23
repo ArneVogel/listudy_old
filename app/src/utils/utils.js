@@ -46,7 +46,10 @@ function favorite(study_id) {
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     http.send();
-    document.getElementById("favoriteButton").style.visibility = "hidden"
+    button = document.getElementById("favoriteButton");
+    button.style.visibility = "hidden"
+    button.style.width = 0;
+    button.style.padding = 0;
 }
 window.favorite = favorite;
 

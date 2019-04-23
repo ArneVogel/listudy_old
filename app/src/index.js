@@ -164,7 +164,6 @@ function initialize(game_number) {
         window.cards = JSON.parse(progress);
     }
 
-    console.log(orientation)
 
     //set the position to the smallest position
     window.pos = smallestPos(window.cards[game_number-1]);
