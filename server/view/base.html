@@ -19,7 +19,7 @@
         <link rel="icon" type="image/png" href="/static/favicon.png">
     </head>
     <body>
-        <div class="container">
+        <div class="container navbar">
             <a href="/">Home</a>
                 <a href="/studies">Search</a>
             {{ if .loggedin }}
@@ -32,12 +32,13 @@
                 <a href="/register">Register</a>
             {{ end }}
         </div>
+        <hr style="margin-top:inherit;">
         <div class="container">
             {{template "content" . }}
         </div>
         {{template "afterBodyJS" .}}
         <hr>
-        <div class="container">
+        <div class="container navbar">
             <a href="/privacy">Privacy</a>
             <a href="/tos">Terms of Service</a>
             <a href="https://github.com/ArneVogel/listudy">Github</a>

@@ -12,3 +12,10 @@
 .study_description {
     white-space: pre-line;
 }
+
+.navbar a {
+    padding-left: 10px;
+}
+.navbar a:first-child {
+    padding-left: 0px;
+}
