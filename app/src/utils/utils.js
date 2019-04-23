@@ -46,7 +46,10 @@ function favorite(study_id) {
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     http.send();
-    document.getElementById("favoriteButton").style.visibility = "hidden"
+    button = document.getElementById("favoriteButton");
+    button.style.visibility = "hidden"
+    button.style.width = 0;
+    button.style.padding = 0;
 }
 window.favorite = favorite;
 
@@ -63,6 +66,40 @@ function toggleHelp() {
 }
 window.toggleHelp = toggleHelp;
 
+function existsLonger(cards, card) {
+    for (var i of Object.keys(cards)) {
+        if (i.startsWith(card) && i.length > card.length) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function updateProgress() {
+    spanPercent = document.getElementById("progress");
+
+    total = 0;
+    learned = 0;
+    cardsInBox = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0};
+    for (var i = 0; i < Object.keys(cards).length; i++) {
+        total += Object.keys(cards[i]).length * 6;
+
+        for (var j of Object.keys(cards[i])) {
+            if (existsLonger(cards[i], j)) {
+                learned += cards[i][j];
+                cardsInBox[cards[i][j]] += 1;
+            }
+        }
+    }
+
+    percentage = Math.round((learned/total)*100);
+    spanPercent.innerHTML = percentage;
+
+    for (var i = 0; i < 6; i++) {
+        document.getElementById("box"+(i+1)).innerHTML = cardsInBox[i]
+    }
+}
+window.updateProgress = updateProgress;
 
 module.exports = {
     toAlgebraic: toAlgebraic,

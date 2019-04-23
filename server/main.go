@@ -49,7 +49,7 @@ func main() {
 	//logger
 	logTo := os.Stdout
 	dt := time.Now()
-	dateFormatString := "2006-02-01" // YYYY-MM-DD
+	dateFormatString := "2006-01-02" // YYYY-MM-DD
 	date := dt.Format(dateFormatString)
 
 	//if in the .env something not equal to stdout is given log to the file instead
@@ -63,10 +63,14 @@ func main() {
 				select {
 				case <-ticker.C:
 					dt := time.Now()
-					if dt.Format(dateFormatString) != date || true {
+					if dt.Format(dateFormatString) != date {
 						date = dt.Format(dateFormatString)
 						logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
-						e.Logger.SetOutput(logTo)
+						e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+							Format: `{"time":"${time_rfc3339}", "method":"${method}", "uri":"${uri}", "status":${status}, "referer":"${referer}"}` + "\n",
+							Output: logTo,
+						}))
+
 					}
 				}
 			}
@@ -90,8 +94,9 @@ func main() {
 	templates["create_study.html"] = template.Must(template.ParseFiles("view/create_study.html", "view/base.html"))
 	templates["study.html"] = template.Must(template.ParseFiles("view/study.html", "view/base.html"))
 	templates["settings.html"] = template.Must(template.ParseFiles("view/settings.html", "view/base.html"))
+	templates["studies.html"] = template.Must(template.ParseFiles("view/studies.html", "view/base.html"))
 
-	static_pages := []string{"privacy", "tos"}
+	static_pages := []string{"privacy", "tos", "thanks-for-registering"}
 	for _, v := range static_pages {
 		templates[v+".html"] = template.Must(template.ParseFiles("view/"+v+".html", "view/base.html"))
 		e.GET("/"+v, handler.StaticPageHandler)
@@ -113,6 +118,7 @@ func main() {
 	uh := &handler.UserHandler{DB: db}
 	hh := &handler.HomeHandler{DB: db}
 	seh := &handler.SettingsHandler{DB: db}
+	sdh := &handler.StudiesHandler{DB: db}
 
 	e.GET("/", hh.HomepageHandler)
 	e.POST("/", hh.HomepageHandler)
@@ -127,6 +133,8 @@ func main() {
 	e.POST("/delete-study/*", sh.DeleteStudy)
 
 	e.GET("/user/*", uh.UserGETHandler)
+
+	e.GET("studies", sdh.StudiesGETHandler)
 
 	e.POST("/change-password", seh.ChangePasswordHandler)
 	e.POST("/delete-account", seh.DeleteAccount)

@@ -6648,8 +6648,6 @@ function initialize(game_number) {
         window.cards = JSON.parse(progress);
     }
 
-    console.log(orientation)
-
     //set the position to the smallest position
     window.pos = smallestPos(window.cards[game_number-1]);
     setToPos(game_db.game(game_number-1), window.pos);
@@ -6658,6 +6656,7 @@ function initialize(game_number) {
     utils.createSelectOptions(game_db, game_number);
     
     ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+    updateProgress();
     if (window.help && cards[game_number-1][pos] < consts.learn_threshold) {
         drawShapes();
         drawCustomShapes();
@@ -6785,11 +6784,9 @@ function updateComments() {
     if (curr_comment == prev_comment) {
         curr_comment = "";
     }
-    console.log(curr_comment);
     curr_comment = curr_comment == undefined ? "" : curr_comment;
     prev_comment = prev_comment == undefined ? "" : prev_comment;
 
-    console.log(curr_comment);
     document.getElementById("commentary1").innerHTML = prev_comment;
     document.getElementById("commentary2").innerHTML = curr_comment;
 }
@@ -6853,8 +6850,14 @@ async function handleMove(orig, dest, metadata) {
     } else {
         tmp = "";
     }
+
+    //possible moves for the player in the position
+    move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
+
+
     //check if there is another move
-    if (!anotherMove(cards[game_number-1], pos+tmp)) {
+    //this path is taken if theres not another move and if the move was avaliable 
+    if (!anotherMove(cards[game_number-1], pos+tmp) && move) {
         wrong_counter = 0;
         card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
         
@@ -6883,12 +6886,11 @@ async function handleMove(orig, dest, metadata) {
             clearComments();
         }
 
+        updateProgress();
         return;
     }
     
 
-    //possible moves for the player in the position
-    var move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
     if (move) {
         wrong_counter = 0;
         //update the value of the move
@@ -6931,6 +6933,7 @@ async function handleMove(orig, dest, metadata) {
         } else {
             clearComments();
         }
+        updateProgress();
 
     } else {
         wrong_counter += 1;
@@ -6948,6 +6951,7 @@ async function handleMove(orig, dest, metadata) {
             drawShapes();
             drawCustomShapes();
         }
+        updateProgress();
     }
 
 }
@@ -7006,7 +7010,10 @@ function favorite(study_id) {
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     http.send();
-    document.getElementById("favoriteButton").style.visibility = "hidden"
+    button = document.getElementById("favoriteButton");
+    button.style.visibility = "hidden"
+    button.style.width = 0;
+    button.style.padding = 0;
 }
 window.favorite = favorite;
 
@@ -7023,6 +7030,40 @@ function toggleHelp() {
 }
 window.toggleHelp = toggleHelp;
 
+function existsLonger(cards, card) {
+    for (var i of Object.keys(cards)) {
+        if (i.startsWith(card) && i.length > card.length) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function updateProgress() {
+    spanPercent = document.getElementById("progress");
+
+    total = 0;
+    learned = 0;
+    cardsInBox = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0};
+    for (var i = 0; i < Object.keys(cards).length; i++) {
+        total += Object.keys(cards[i]).length * 6;
+
+        for (var j of Object.keys(cards[i])) {
+            if (existsLonger(cards[i], j)) {
+                learned += cards[i][j];
+                cardsInBox[cards[i][j]] += 1;
+            }
+        }
+    }
+
+    percentage = Math.round((learned/total)*100);
+    spanPercent.innerHTML = percentage;
+
+    for (var i = 0; i < 6; i++) {
+        document.getElementById("box"+(i+1)).innerHTML = cardsInBox[i]
+    }
+}
+window.updateProgress = updateProgress;
 
 module.exports = {
     toAlgebraic: toAlgebraic,
