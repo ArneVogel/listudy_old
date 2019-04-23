@@ -136,8 +136,14 @@ async function handleMove(orig, dest, metadata) {
     } else {
         tmp = "";
     }
+
+    //possible moves for the player in the position
+    move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
+
+
     //check if there is another move
-    if (!anotherMove(cards[game_number-1], pos+tmp)) {
+    //this path is taken if theres not another move and if the move was avaliable 
+    if (!anotherMove(cards[game_number-1], pos+tmp) && move) {
         wrong_counter = 0;
         card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
         
@@ -166,12 +172,11 @@ async function handleMove(orig, dest, metadata) {
             clearComments();
         }
 
+        updateProgress();
         return;
     }
     
 
-    //possible moves for the player in the position
-    var move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
     if (move) {
         wrong_counter = 0;
         //update the value of the move
