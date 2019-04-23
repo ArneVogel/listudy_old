@@ -63,7 +63,7 @@ func main() {
 				select {
 				case <-ticker.C:
 					dt := time.Now()
-					if dt.Format(dateFormatString) != date || true {
+					if dt.Format(dateFormatString) != date {
 						date = dt.Format(dateFormatString)
 						logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 						e.Logger.SetOutput(logTo)
