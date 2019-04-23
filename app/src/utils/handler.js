@@ -145,7 +145,7 @@ async function handleMove(orig, dest, metadata) {
     //this path is taken if theres not another move and if the move was avaliable 
     if (!anotherMove(cards[game_number-1], pos+tmp) && move) {
         wrong_counter = 0;
-        card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
+        card_value = cards[game_number-1][pos] = Math.min(cards[game_number-1][pos] + 1, 4);
         
         if (move == 0) {
             pos += "m";
@@ -180,7 +180,7 @@ async function handleMove(orig, dest, metadata) {
     if (move) {
         wrong_counter = 0;
         //update the value of the move
-        card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
+        card_value = cards[game_number-1][pos] = Math.min(cards[game_number-1][pos] + 1, 4);
 
         if (move == 0) {
             pos += "m";
@@ -231,7 +231,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
 
         //update the move value, never make it less than 0
-        cards[game_number-1][pos] = Math.max(cards[game_number-1][pos] -2, 0);
+        cards[game_number-1][pos] = 0;
 
         if (wrong_counter >= 2) {
             drawShapes();

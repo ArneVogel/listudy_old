@@ -82,7 +82,15 @@ function updateProgress() {
     learned = 0;
     cardsInBox = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0};
     for (var i = 0; i < Object.keys(cards).length; i++) {
-        total += Object.keys(cards[i]).length * 6;
+        var all = Object.keys(cards[i]);
+        var hasLonger = [];
+        for (var k of all) {
+            if (existsLonger(cards[i], k)) {
+                hasLonger.push(k);
+            }
+        }
+        total += hasLonger.length * 4;
+
 
         for (var j of Object.keys(cards[i])) {
             if (existsLonger(cards[i], j)) {
@@ -95,7 +103,7 @@ function updateProgress() {
     percentage = Math.round((learned/total)*100);
     spanPercent.innerHTML = percentage;
 
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 5; i++) {
         document.getElementById("box"+(i+1)).innerHTML = cardsInBox[i]
     }
 }

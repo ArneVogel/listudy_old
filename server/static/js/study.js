@@ -6859,7 +6859,7 @@ async function handleMove(orig, dest, metadata) {
     //this path is taken if theres not another move and if the move was avaliable 
     if (!anotherMove(cards[game_number-1], pos+tmp) && move) {
         wrong_counter = 0;
-        card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
+        card_value = cards[game_number-1][pos] = Math.min(cards[game_number-1][pos] + 1, 4);
         
         if (move == 0) {
             pos += "m";
@@ -6894,7 +6894,7 @@ async function handleMove(orig, dest, metadata) {
     if (move) {
         wrong_counter = 0;
         //update the value of the move
-        card_value = cards[game_number-1][pos] = cards[game_number-1][pos] + 1;
+        card_value = cards[game_number-1][pos] = Math.min(cards[game_number-1][pos] + 1, 4);
 
         if (move == 0) {
             pos += "m";
@@ -6945,7 +6945,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
 
         //update the move value, never make it less than 0
-        cards[game_number-1][pos] = Math.max(cards[game_number-1][pos] -2, 0);
+        cards[game_number-1][pos] = 0;
 
         if (wrong_counter >= 2) {
             drawShapes();
@@ -7046,7 +7046,15 @@ function updateProgress() {
     learned = 0;
     cardsInBox = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0};
     for (var i = 0; i < Object.keys(cards).length; i++) {
-        total += Object.keys(cards[i]).length * 6;
+        var all = Object.keys(cards[i]);
+        var hasLonger = [];
+        for (var k of all) {
+            if (existsLonger(cards[i], k)) {
+                hasLonger.push(k);
+            }
+        }
+        total += hasLonger.length * 4;
+
 
         for (var j of Object.keys(cards[i])) {
             if (existsLonger(cards[i], j)) {
@@ -7055,11 +7063,13 @@ function updateProgress() {
             }
         }
     }
+    console.log(total)
+    console.log(learned)
 
     percentage = Math.round((learned/total)*100);
     spanPercent.innerHTML = percentage;
 
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 5; i++) {
         document.getElementById("box"+(i+1)).innerHTML = cardsInBox[i]
     }
 }

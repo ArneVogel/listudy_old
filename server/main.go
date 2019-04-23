@@ -96,7 +96,7 @@ func main() {
 	templates["settings.html"] = template.Must(template.ParseFiles("view/settings.html", "view/base.html"))
 	templates["studies.html"] = template.Must(template.ParseFiles("view/studies.html", "view/base.html"))
 
-	static_pages := []string{"privacy", "tos", "thanks-for-registering"}
+	static_pages := []string{"privacy", "tos", "thanks-for-registering", "how-studying-works"}
 	for _, v := range static_pages {
 		templates[v+".html"] = template.Must(template.ParseFiles("view/"+v+".html", "view/base.html"))
 		e.GET("/"+v, handler.StaticPageHandler)
