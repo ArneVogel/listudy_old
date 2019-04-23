@@ -21,6 +21,7 @@
     <body>
         <div class="container">
             <a href="/">Home</a>
+                <a href="/studies">Search</a>
             {{ if .loggedin }}
                 <a href="/create-study">Create a Study</a>
                 <a href="/user/{{.name}}">Profile</a>
@@ -30,7 +31,6 @@
                 <a href="/login">Login</a>
                 <a href="/register">Register</a>
             {{ end }}
-                <a href="/studies">Search</a>
         </div>
         <div class="container">
             {{template "content" . }}
