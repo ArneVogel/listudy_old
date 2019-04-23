@@ -49,7 +49,7 @@ func main() {
 	//logger
 	logTo := os.Stdout
 	dt := time.Now()
-	dateFormatString := "2006-02-01" // YYYY-MM-DD
+	dateFormatString := "2006-01-02" // YYYY-MM-DD
 	date := dt.Format(dateFormatString)
 
 	//if in the .env something not equal to stdout is given log to the file instead
@@ -66,7 +66,11 @@ func main() {
 					if dt.Format(dateFormatString) != date {
 						date = dt.Format(dateFormatString)
 						logTo, _ = os.OpenFile(utils.Env("log_prefix")+date+utils.Env("log_suffix"), os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
-						e.Logger.SetOutput(logTo)
+						e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+							Format: `{"time":"${time_rfc3339}", "method":"${method}", "uri":"${uri}", "status":${status}, "referer":"${referer}"}` + "\n",
+							Output: logTo,
+						}))
+
 					}
 				}
 			}
