@@ -6841,23 +6841,38 @@ function drawCustomShapes() {
 window.drawCustomShapes = drawCustomShapes;
 
 async function handleMove(orig, dest, metadata) {
-    var move = moveExists(filterPossible(cards[game_number-1], possibleMoves(game_db.game(game_number-1), window.pos), pos), [orig, dest])
-    var tmp;
-    if (move == 0) {
-        tmp = "m"
-    } else if (move != false) {
-        tmp = move-1;
-    } else {
-        tmp = "";
+    var move = moveExists(possibleMoves(game_db.game(game_number-1), pos), [orig, dest]);
+
+    // wrong move
+    if (!move) {
+        wrong_counter += 1;
+
+        await sleep(200);
+        //ground.move(dest, orig);
+        setToPos(game_db.game(game_number-1), pos);
+        ground.state.turnColor = orientation; 
+        ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+
+        //update the move value, never make it less than 0
+        cards[game_number-1][pos] = 0;
+
+        if (wrong_counter >= 2) {
+            drawShapes();
+            drawCustomShapes();
+        }
+        updateProgress();
     }
 
-    //possible moves for the player in the position
-    move = moveExists(possibleMoves(game_db.game(game_number-1), window.pos), [orig, dest])
 
+    var tmp;
+    if (move == 0) {
+        tmp = "m";
+    } else {
+        tmp = move-1;
+    }
 
-    //check if there is another move
-    //this path is taken if theres not another move and if the move was avaliable 
-    if (!anotherMove(cards[game_number-1], pos+tmp) && move) {
+    // no other move in the line
+    if (!anotherMove(cards[game_number-1], pos+tmp)) {
         wrong_counter = 0;
         card_value = cards[game_number-1][pos] = Math.min(cards[game_number-1][pos] + 1, 4);
         
@@ -6891,7 +6906,7 @@ async function handleMove(orig, dest, metadata) {
     }
     
 
-    if (move) {
+    if (move !== false) {
         wrong_counter = 0;
         //update the value of the move
         card_value = cards[game_number-1][pos] = Math.min(cards[game_number-1][pos] + 1, 4);
@@ -6934,26 +6949,9 @@ async function handleMove(orig, dest, metadata) {
             clearComments();
         }
         updateProgress();
-
-    } else {
-        wrong_counter += 1;
-
-        await sleep(200);
-        //ground.move(dest, orig);
-        setToPos(game_db.game(game_number-1), pos);
-        ground.state.turnColor = orientation; 
-        ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
-
-        //update the move value, never make it less than 0
-        cards[game_number-1][pos] = 0;
-
-        if (wrong_counter >= 2) {
-            drawShapes();
-            drawCustomShapes();
-        }
-        updateProgress();
-    }
-
+        return;
+    } 
+    console.log("this point should not have been reached: under handler")
 }
 
 
@@ -7063,8 +7061,6 @@ function updateProgress() {
             }
         }
     }
-    console.log(total)
-    console.log(learned)
 
     percentage = Math.round((learned/total)*100);
     spanPercent.innerHTML = percentage;
