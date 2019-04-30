@@ -3,11 +3,13 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"../database"
@@ -189,11 +191,19 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	limit, _ := strconv.ParseInt(utils.Env("max_file_size"), 10, 64)
+	if file.Size >= limit {
+		return errors.New("The file is too big, maximum file size limit: " + strconv.FormatInt(limit/1000000, 10) + "MB")
+	}
+
 	src, err := file.Open()
 	if err != nil {
 		return err
 	}
 	defer src.Close()
+
+	fmt.Println(file.Size)
 
 	dst, err := os.Create(utils.Env("pgn_folder") + id + ".pgn")
 	if err != nil {
