@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -197,13 +196,15 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 		return errors.New("The file is too big, maximum file size limit: " + strconv.FormatInt(limit/1000000, 10) + "MB")
 	}
 
+	if file.Header["Content-Type"][0] != "application/vnd.chess-pgn" {
+		return errors.New("Please only upload pgn files")
+	}
+
 	src, err := file.Open()
 	if err != nil {
 		return err
 	}
 	defer src.Close()
-
-	fmt.Println(file.Size)
 
 	dst, err := os.Create(utils.Env("pgn_folder") + id + ".pgn")
 	if err != nil {
