@@ -6708,6 +6708,11 @@ var chessGroundConfig = {
         events: {
             after: handler.handleMove
         }
+    },
+    drawable: {
+        brushes: {
+            variation: { key: "v", color: "#05fcc6", opacity: 1, lineWidth: 10  }
+        }
     }
 }
 
@@ -6773,7 +6778,7 @@ function drawShapes() {
     }
     shapes = [];
     for (var move in moves) {
-        shapes.push({orig: moves[move][0], dest: moves[move][1], brush:"green"})
+        shapes.push({orig: moves[move][0], dest: moves[move][1], brush:"variation"})
     }
     ground.setShapes(shapes)
 }
@@ -6985,11 +6990,9 @@ async function handleMove(orig, dest, metadata) {
             //if there was an error in the line, repeat the line
             var smallest = smallestInLine(cards[game_number-1], localStorage.getItem("end_of_line"));
             if (smallest !== false) {
-                console.log("going back in line")
                 pos = smallest;
             } else {
                 //pick a new line to learn and set the position
-                console.log("picking new line")
                 localStorage.setItem("end_of_line", newLine(cards[game_number-1]));
                 pos = orientation == "white" ? "" : newLine(cards[game_number-1])[0];
             }

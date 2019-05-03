@@ -45,7 +45,7 @@ function drawShapes() {
     }
     shapes = [];
     for (var move in moves) {
-        shapes.push({orig: moves[move][0], dest: moves[move][1], brush:"green"})
+        shapes.push({orig: moves[move][0], dest: moves[move][1], brush:"variation"})
     }
     ground.setShapes(shapes)
 }

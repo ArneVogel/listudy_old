@@ -16,6 +16,11 @@ var chessGroundConfig = {
         events: {
             after: handler.handleMove
         }
+    },
+    drawable: {
+        brushes: {
+            variation: { key: "v", color: "#05fcc6", opacity: 1, lineWidth: 10  }
+        }
     }
 }
 
