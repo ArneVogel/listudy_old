@@ -1,26 +1,24 @@
 function toggleDarkMode() {
-    if (readCookieValue("darkmode") == "white") {
-        document.cookie = 'darkmode=dark; expires=Fri, 31 Dec 9999 23:59:59 GMT';   
+    var mode = localStorage.getItem("darkmode");
+    if (mode == "white") {
+        localStorage.setItem("darkmode", "dark")
     } else {
-        document.cookie = 'darkmode=white; expires=Fri, 31 Dec 9999 23:59:59 GMT';   
+        localStorage.setItem("darkmode", "white")
     }
     applyMode();
 }
 
-function readCookieValue(cookieName) {
-    cookiesSplit = document.cookie.split(';');
-    for (var j of cookiesSplit) {
-        if (j.trim().startsWith(cookieName)) {
-            return j.split('=')[1];
-        }
-    }
-}
-
-//reads the cookie and applies the mode
+//reads the localstorage and applies the mode
 function applyMode() {
+    //for the first load set the default value
+    var mode = localStorage.getItem("darkmode");
+    if (mode != "white" && mode != "dark") {
+        localStorage.setItem("darkmode", "white")
+    }
+
     var changeToBackground;
     var changeToColor;
-    if (readCookieValue("darkmode") == "dark") {
+    if (localStorage.getItem("darkmode") == "dark") {
         document.getElementById("darkmode").innerHTML = "Light Mode"
 
         changeToColor = "#929292";
@@ -30,7 +28,6 @@ function applyMode() {
 
         changeToColor = "#222";
         changeToBackground = "white";
-
     }
     document.body.style.background = changeToBackground;
     document.body.style.color = changeToColor;
