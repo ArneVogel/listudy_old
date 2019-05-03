@@ -7002,7 +7002,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
         ground.state.turnColor = orientation; 
 
-        if (window.help && cards[game_number-1][pos] < learn_threshold) {
+        if ((window.help && cards[game_number-1][pos] < learn_threshold) || localStorage.getItem("training_mode") == "lines" ) {
             drawShapes();
             drawCustomShapes();
             updateComments();
