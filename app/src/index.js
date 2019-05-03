@@ -141,6 +141,12 @@ function createCards() {
         var offset = first_move == orientation_move ? 0 : 1;
 
         var tmp = {};
+        //when the move is the last in line and the opponent has no reply
+        for (var j of endOfLines(iterCards)) {
+            if ((j.length + offset) % 2 == 1) {
+                tmp[j+"m"] = 0;
+            }
+        }
         for (var j in iterCards) {
             if ((j.length + offset) % 2 == 0) {
                 tmp[j] = 0;
@@ -152,6 +158,11 @@ function createCards() {
 }
 
 function initialize(game_number) {
+    if (localStorage.getItem("training_mode") == null || localStorage.getItem("training_mode") == "lines") {
+        localStorage.setItem("training_mode", "lines");
+    }
+    initTrainingMode();
+
     window.help = true;
     window.game_number = game_number;
     window.wrong_counter = 0;
@@ -180,6 +191,9 @@ function initialize(game_number) {
     } else {
         clearComments();
     }
+
+    // in case the training mode is lines
+    localStorage.setItem("end_of_line", newLine(cards[game_number-1]));
 }
 
 cards = {}

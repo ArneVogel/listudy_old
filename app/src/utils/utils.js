@@ -109,6 +109,17 @@ function updateProgress() {
 }
 window.updateProgress = updateProgress;
 
+function changeTrainingMode() {
+    var v = document.getElementById("training_mode").value;
+    localStorage.setItem("training_mode", v);
+}
+window.changeTrainingMode = changeTrainingMode;
+
+function initTrainingMode() {
+    var v = document.getElementById("training_mode").value = localStorage.getItem("training_mode");
+}
+window.initTrainingMode = initTrainingMode;
+
 module.exports = {
     toAlgebraic: toAlgebraic,
     movesFromMoveDescriptor: movesFromMoveDescriptor,

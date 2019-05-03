@@ -33,6 +33,16 @@ window.anotherMove = anotherMove
 //draws the shapes of the possible moves at the current position
 function drawShapes() {
     moves = possibleMoves(game_db.game(game_number-1), pos);
+    if (localStorage.getItem("training_mode") == "lines") {
+        p = localStorage.getItem("end_of_line").substring(pos.length, pos.length+1);
+        if (p == "m") {
+            p = 0;
+        } else {
+            p = parseInt(p)+1;
+        }
+        only_move = moves[p];
+        moves = [only_move];
+    }
     shapes = [];
     for (var move in moves) {
         shapes.push({orig: moves[move][0], dest: moves[move][1], brush:"green"})
@@ -84,6 +94,37 @@ function clearComments() {
 }
 window.clearComments = clearComments;
 
+function endOfLines(lines) {
+    var end_lines = [];
+    var end;
+    for (var i in lines) {
+        end = true;
+        for (var j in lines) {
+            if (i != j && j.startsWith(i)) {
+                end = false;
+                break;
+            }
+        }
+        if (end) {
+            end_lines.push(i); 
+        }
+    }
+    return end_lines;
+}
+window.endOfLines = endOfLines;
+
+function newLine(lines) {
+    ends = endOfLines(lines);
+    line = ends[0];
+    for (var i of ends) {
+        if (cards[game_number-1][i] < cards[game_number-1][line]) {
+            line = i;
+        }
+    }
+    return line;
+}
+window.newLine = newLine;
+
 //draws the shapes drawn by the pgn creator
 function drawCustomShapes() {
     game = gameAtPos(game_db.game(game_number-1), pos.substring(0,pos.length-1))[0];
@@ -126,8 +167,44 @@ function drawCustomShapes() {
 }
 window.drawCustomShapes = drawCustomShapes;
 
+function smallestInLine(cards, line) {
+    var smallest, value;
+    value = 999;
+    smallest = "a".repeat(1000)
+    for (var i in cards) {
+        if (i != line && line.startsWith(i)) {
+            if (cards[i] < value ) {
+                smallest = i;
+                value = cards[i];
+            } else if (cards[i] == value && i.length < smallest.length) {
+                smallest = i;
+                value = cards[i];
+            }
+        }
+    }
+    if (value > 1) {
+        return false;
+    }
+    return smallest;
+}
+window.smallestInLine = smallestInLine;
+
 async function handleMove(orig, dest, metadata) {
     var move = moveExists(possibleMoves(game_db.game(game_number-1), pos), [orig, dest]);
+
+    //in lines mode the right line has to be picked
+    if (localStorage.getItem("training_mode") == "lines") {
+        p = localStorage.getItem("end_of_line").substring(pos.length, pos.length+1);
+        if (p == "m") {
+            p = 0;
+        } else {
+            p = parseInt(p)+1;
+        }
+        if (p != move) {
+            move = false;
+        }
+
+    }
 
     // wrong move
     if (!move) {
@@ -173,7 +250,20 @@ async function handleMove(orig, dest, metadata) {
         //TODO show the last move from the other player
         //or maybe not, not sure tbh, does it add value to the training?
 
-        pos = smallestPos(cards[game_number-1])
+        if (localStorage.getItem("training_mode") == "random") {
+            pos = smallestPos(cards[game_number-1])
+        } else if (localStorage.getItem("training_mode") == "lines") {
+            cards[game_number-1][localStorage.getItem("end_of_line")] = Math.min(cards[game_number-1][localStorage.getItem("end_of_line")] + 1, 4)
+            //if there was an error in the line, repeat the line
+            var smallest = smallestInLine(cards[game_number-1], localStorage.getItem("end_of_line"));
+            if (smallest !== false) {
+                pos = smallest;
+            } else {
+                //pick a new line to learn and set the position
+                localStorage.setItem("end_of_line", newLine(cards[game_number-1]));
+                pos = orientation == "white" ? "" : newLine(cards[game_number-1])[0];
+            }
+        }
         setToPos(game_db.game(game_number-1), window.pos);
 
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
@@ -209,7 +299,17 @@ async function handleMove(orig, dest, metadata) {
         //the next move, either continue in the line or pick the smallest unlearned line
         
         possible = filterPossible(cards[game_number-1], possibleMoves(game_db.game(game_number-1), pos),pos);
-        play = getRandomInt(0, possible.length-1)
+        var play;
+        if (localStorage.getItem("training_mode") == "random") {
+            play = getRandomInt(0, possible.length-1)
+        } else if (localStorage.getItem("training_mode") == "lines"){
+            p = localStorage.getItem("end_of_line").substring(pos.length, pos.length+1);
+            if (p == "m") {
+                play = 0;
+            } else {
+                play = parseInt(p)+1;
+            }
+        }
         ground.move(possible[play][0], possible[play][1])
         if (play == 0) {
             pos += "m";
@@ -217,11 +317,12 @@ async function handleMove(orig, dest, metadata) {
             pos += play-1;
         }
 
-        // -2 to give a bias to stay in the line
-        if (! cards[game_number-1][pos] <= (card_value -2)) {
-            pos = smallestPos(cards[game_number-1])
-            setToPos(game_db.game(game_number-1), window.pos);
-
+        if (localStorage.getItem("training_mode") == "random") {
+            // -2 to give a bias to stay in the line
+            if (! cards[game_number-1][pos] <= (card_value -2)) {
+                pos = smallestPos(cards[game_number-1])
+                setToPos(game_db.game(game_number-1), window.pos);
+            }
         }
 
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)

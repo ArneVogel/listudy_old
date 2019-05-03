@@ -77,6 +77,11 @@ Study {{.study_title}} online for free.
     <button type="button" onclick="favorite('{{.study_id}}')" id="favoriteButton">Favorite this study</button>
 {{ end }}
     <button type="button" onclick="toggleHelp()" id="help">Disable help</button>
+    <label for="training_mode">Training Mode</label>
+    <select id="training_mode" onchange="changeTrainingMode()">
+        <option value="lines" selected>Lines</option>
+        <option value="random">Random</option>
+    </select>
 
 <p>This study was created by: <a href="/user/{{.creator}}">{{.creator}}</a></p>
 <p class="study_description">{{.description}}</p>

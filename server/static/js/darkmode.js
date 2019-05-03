@@ -36,6 +36,7 @@ function applyMode() {
     document.body.style.color = changeToColor;
     if (document.getElementById("game_number") != undefined) {
         document.getElementById("game_number").style.background = changeToBackground;
+        document.getElementById("training_mode").style.background = changeToBackground;
     }
 }
 
