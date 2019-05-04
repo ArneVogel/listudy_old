@@ -184,6 +184,9 @@ function initialize(game_number) {
     
     ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
     updateProgress();
+
+    // in case the training mode is lines, this has to be done before drawShapes
+    localStorage.setItem("end_of_line", newLine(cards[game_number-1]));
     if (window.help && cards[game_number-1][pos] < consts.learn_threshold) {
         drawShapes();
         drawCustomShapes();
@@ -192,8 +195,6 @@ function initialize(game_number) {
         clearComments();
     }
 
-    // in case the training mode is lines
-    localStorage.setItem("end_of_line", newLine(cards[game_number-1]));
 }
 
 cards = {}
