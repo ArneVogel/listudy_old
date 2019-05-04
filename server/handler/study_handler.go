@@ -185,7 +185,6 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	}
 	//user_id := 1
 
-	//TODO make sure this is a pgn file
 	file, err := c.FormFile("pgn")
 	if err != nil {
 		return err
@@ -196,9 +195,10 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 		return errors.New("The file is too big, maximum file size limit: " + strconv.FormatInt(limit/1000000, 10) + "MB")
 	}
 
-	if file.Header["Content-Type"][0] != "application/vnd.chess-pgn" {
-		return errors.New("Please only upload pgn files")
-	}
+	//TODO figure out what windows sends as mime type
+	//if file.Header["Content-Type"][0] != "application/vnd.chess-pgn" {
+	//	return errors.New("Please only upload pgn files")
+	//}
 
 	src, err := file.Open()
 	if err != nil {
