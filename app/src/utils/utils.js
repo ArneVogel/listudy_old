@@ -120,6 +120,22 @@ function initTrainingMode() {
 }
 window.initTrainingMode = initTrainingMode;
 
+function writeInfo(info_text, s = "default") {
+    var info = document.getElementById("info");
+    info.innerHTML = "";
+    info.className = "";
+    if (s !== "default") {
+        var i = document.createElement("i");
+        i.className += s + "_icon";
+        info.className += " " + s + "_wrapper";
+        info.className += " message_wrapper";
+        info.prepend(i);
+    }
+    info.innerHTML += info_text;
+}
+window.writeInfo = writeInfo;
+
+
 module.exports = {
     toAlgebraic: toAlgebraic,
     movesFromMoveDescriptor: movesFromMoveDescriptor,

@@ -23,3 +23,53 @@
 .study_stats td {
     padding: 0px;
 }
+
+.warn_icon {
+    content: url("/static/images/warn.svg");
+}
+
+.error_icon {
+    content: url("/static/images/error.svg");
+}
+
+.success_icon {
+    content: url("/static/images/success.svg");
+}
+
+.info_icon {
+    content: url("/static/images/info.svg");
+}
+
+.warn_icon,
+.error_icon,
+.success_icon,
+.info_icon {
+    width: 0.8em;
+    padding-right: 0.4em;
+}
+
+.warn_wrapper {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+
+.error_wrapper {
+    color: #D8000C;
+    background-color: #FFBABA;
+}
+
+.success_wrapper {
+    color: #270;
+    background-color: #DFF2BF;
+}
+
+.info_wrapper {
+    color: #059;
+    background-color: #BEF;
+}
+
+.message_wrapper {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 3px 3px 3px 3px;
+}

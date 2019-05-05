@@ -194,7 +194,7 @@ function initialize(game_number) {
     } else {
         clearComments();
     }
-
+    writeInfo("");
 }
 
 cards = {}

@@ -6678,7 +6678,7 @@ function initialize(game_number) {
     } else {
         clearComments();
     }
-
+    writeInfo("");
 }
 
 cards = {}
@@ -6916,7 +6916,7 @@ function smallestInLine(cards, line) {
             }
         }
     }
-    if (value > 1) {
+    if (value > 2) {
         return false;
     }
     return smallest;
@@ -6924,20 +6924,24 @@ function smallestInLine(cards, line) {
 window.smallestInLine = smallestInLine;
 
 async function handleMove(orig, dest, metadata) {
+    writeInfo("");
+    var mode = localStorage.getItem("training_mode");
     var move = moveExists(possibleMoves(game_db.game(game_number-1), pos), [orig, dest]);
 
     //in lines mode the right line has to be picked
-    if (localStorage.getItem("training_mode") == "lines") {
+    if (mode == "lines") {
         p = localStorage.getItem("end_of_line").substring(pos.length, pos.length+1);
         if (p == "m") {
             p = 0;
         } else {
             p = parseInt(p)+1;
         }
+        if (move !== false && p != move) {
+            writeInfo("This move exists but in a different line.", "info");
+        }
         if (p != move) {
             move = false;
         }
-
     }
 
     // wrong move
@@ -6958,6 +6962,7 @@ async function handleMove(orig, dest, metadata) {
             drawCustomShapes();
         }
         updateProgress();
+        return;
     }
 
 
@@ -6991,9 +6996,10 @@ async function handleMove(orig, dest, metadata) {
             //if there was an error in the line, repeat the line
             var smallest = smallestInLine(cards[game_number-1], localStorage.getItem("end_of_line"));
             if (smallest !== false) {
-                pos = smallest;
+                pos = orientation == "white" ? "" : newLine(cards[game_number-1])[0];
             } else {
                 //pick a new line to learn and set the position
+                writeInfo("Starting a new line.", "success");
                 localStorage.setItem("end_of_line", newLine(cards[game_number-1]));
                 pos = orientation == "white" ? "" : newLine(cards[game_number-1])[0];
             }
@@ -7003,7 +7009,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
         ground.state.turnColor = orientation; 
 
-        if ((window.help && cards[game_number-1][pos] < learn_threshold) || localStorage.getItem("training_mode") == "lines" ) {
+        if ((window.help && cards[game_number-1][pos] < learn_threshold) || cards[game_number-1][localStorage.getItem("end_of_line")] < 1 ) {
             drawShapes();
             drawCustomShapes();
             updateComments();
@@ -7062,7 +7068,7 @@ async function handleMove(orig, dest, metadata) {
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
         ground.state.turnColor = orientation; 
 
-        if (window.help && cards[game_number-1][pos] < learn_threshold) {
+        if ( (window.help && cards[game_number-1][pos] < learn_threshold && mode != "lines") || ( localStorage.getItem("training_mode") == "lines" && cards[game_number-1][localStorage.getItem("end_of_line")] < 1)) {
             drawShapes();
             drawCustomShapes();
             updateComments();
@@ -7202,6 +7208,22 @@ function initTrainingMode() {
     var v = document.getElementById("training_mode").value = localStorage.getItem("training_mode");
 }
 window.initTrainingMode = initTrainingMode;
+
+function writeInfo(info_text, s = "default") {
+    var info = document.getElementById("info");
+    info.innerHTML = "";
+    info.className = "";
+    if (s !== "default") {
+        var i = document.createElement("i");
+        i.className += s + "_icon";
+        info.className += " " + s + "_wrapper";
+        info.className += " message_wrapper";
+        info.prepend(i);
+    }
+    info.innerHTML += info_text;
+}
+window.writeInfo = writeInfo;
+
 
 module.exports = {
     toAlgebraic: toAlgebraic,
