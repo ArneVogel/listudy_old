@@ -25,7 +25,7 @@ Study {{.study_title}} online for free.
 
 {{define "content"}}
 <h1>{{.study_title}}</h1>
-<section class="blue merida">
+<section id="board_styles" class="blue merida">
     <div id="chessboard" class="chessboard manipulable cg-board-wrap"></div>
     <div class="commentary">
         <div id="info">Your study cannot be loaded properly, please let me know with a link to the study.</div>
@@ -83,6 +83,22 @@ Study {{.study_title}} online for free.
         <option value="lines" selected>Lines</option>
         <option value="random">Random</option>
     </select>
+
+
+    <label for="board_background">Board Style</label>
+    <select id="board_background" onchange="applyBoardStyle('change')">
+        <option value="blue" selected>Blue</option>
+        <option value="brown">Brown</option>
+        <option value="marble">Marble</option>
+        <option value="wood">Wood</option>
+    </select>
+    <label for="board_pieces">Piece Style</label>
+    <select id="board_pieces" onchange="applyBoardStyle('change')">
+        <option value="merida" selected>Merida</option>
+        <option value="cburnett">Cburnett</option>
+        <option value="pirouetti">Pirouetti</option>
+    </select>
+
 
 <p>This study was created by: <a href="/user/{{.creator}}">{{.creator}}</a></p>
 <p class="study_description">{{.description}}</p>

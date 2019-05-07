@@ -4,11 +4,20 @@ var utils = require('./utils/utils.js');
 var consts = require('./utils/consts.js');
 
 var game_db = kokopu.pgnRead(pgn);
-var game_div = document.getElementById("chessboard")
-var ground = Chessground(game_div, consts.getChessGroundConfig(orientation, game_db.game(0).initialPosition().fen()));
+//var game_div = document.getElementById("chessboard")
+//var ground = Chessground(game_div, consts.getChessGroundConfig(orientation, game_db.game(0).initialPosition().fen()));
+
+function initGround() {
+    var game_div = document.getElementById("chessboard")
+    var ground = Chessground(game_div, consts.getChessGroundConfig(orientation, game_db.game(0).initialPosition().fen()));
+
+    window.ground = ground;
+    setToPos(game_db.game(game_number-1), window.pos);
+    ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
+}
+window.initGround = initGround;
 
 window.game_db = game_db
-window.ground = ground
 window.kokopu = kokopu
 window.translate = utils.toAlgebraic
 window.getConfig = consts.getChessGroundConfig
@@ -177,12 +186,12 @@ function initialize(game_number) {
 
     //set the position to the smallest position
     window.pos = smallestPos(window.cards[game_number-1]);
-    setToPos(game_db.game(game_number-1), window.pos);
+    initGround();
+    applyBoardStyle();
 
     //creates the game_number select options corresponding to the number of games in the game_db and selects the current game
     utils.createSelectOptions(game_db, game_number);
     
-    ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
     updateProgress();
 
     // in case the training mode is lines, this has to be done before drawShapes

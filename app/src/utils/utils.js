@@ -141,3 +141,22 @@ module.exports = {
     movesFromMoveDescriptor: movesFromMoveDescriptor,
     createSelectOptions: createSelectOptions
 }
+
+function applyBoardStyle(call) {
+    if (localStorage.getItem("board_background") == null) {
+        localStorage.setItem("board_background", "blue");
+        localStorage.setItem("board_pieces", "merida");
+    } 
+    if (call == "load") {
+        document.getElementById("board_background").value = localStorage.getItem("board_background");
+        document.getElementById("board_pieces").value = localStorage.getItem("board_pieces");
+    } else if (call == "change") {
+        localStorage.setItem("board_background", document.getElementById("board_background").value);
+        localStorage.setItem("board_pieces", document.getElementById("board_pieces").value);
+    }
+
+    var b = document.getElementById("board_styles");
+    b.classList = [`${localStorage.getItem("board_background")} ${localStorage.getItem("board_pieces")}`]
+    initGround();
+}
+window.applyBoardStyle = applyBoardStyle;
