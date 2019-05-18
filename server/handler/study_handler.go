@@ -22,6 +22,10 @@ func CreateStudyGETHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "create_study.html", utils.ClaimsForRender(c.Cookies()))
 }
 
+func StudyTutorialHandler(c echo.Context) error {
+	return c.Render(http.StatusOK, "study_tutorial.html", utils.ClaimsForRender(c.Cookies()))
+}
+
 func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	b := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())

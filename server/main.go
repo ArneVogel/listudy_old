@@ -92,7 +92,8 @@ func main() {
 	templates["register.html"] = template.Must(template.ParseFiles("view/register.html", "view/base.html"))
 	templates["user.html"] = template.Must(template.ParseFiles("view/user.html", "view/base.html"))
 	templates["create_study.html"] = template.Must(template.ParseFiles("view/create_study.html", "view/base.html"))
-	templates["study.html"] = template.Must(template.ParseFiles("view/study.html", "view/base.html"))
+	templates["study.html"] = template.Must(template.ParseFiles("view/study.html", "view/base.html", "view/study_tutorial.html"))
+	templates["study_tutorial.html"] = template.Must(template.ParseFiles("view/study_tutorial.html", "view/study.html", "view/base.html"))
 	templates["settings.html"] = template.Must(template.ParseFiles("view/settings.html", "view/base.html"))
 	templates["studies.html"] = template.Must(template.ParseFiles("view/studies.html", "view/base.html"))
 
@@ -109,6 +110,7 @@ func main() {
 	e.GET("/login", handler.LoginGETHandler)
 	e.GET("/logout", handler.LogoutHandler)
 	e.GET("/create-study", handler.CreateStudyGETHandler)
+	e.GET("/study-tutorial", handler.StudyTutorialHandler)
 	e.GET("/register", handler.RegisterGETHandler)
 	e.GET("/settings", handler.SettingsGETHandler)
 

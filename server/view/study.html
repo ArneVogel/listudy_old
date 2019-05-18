@@ -12,15 +12,29 @@ Study {{.study_title}} online for free.
         var orientation = "{{.orientation}}";
         var progress = "{{.progress}}";
     </script>
+
+    {{ if not .pgn }}
+        {{/* only added for the tutorial */}}
+        {{template "study_js" .}}
+    {{end}}
 {{end}}
 
 {{define "css"}}
     <link rel="stylesheet" href="/static/css/chessground.css">
     <link rel="stylesheet" href="/static/css/theme.css">
     <link rel="stylesheet" href="/static/css/3d.css">
+
+    {{ if not .pgn }}
+        {{/* only added for the tutorial */}}
+        {{template "study_css" .}}
+    {{end}}
 {{end}}
 {{define "afterBodyJS"}}
     <script type="application/javascript" src="/static/js/study.js"></script>
+    {{ if not .pgn }}
+        {{/* only added for the tutorial */}}
+        {{template "study_after_js" .}}
+    {{end}}
 {{end}}
 
 {{define "content"}}
@@ -35,12 +49,12 @@ Study {{.study_title}} online for free.
 </section>
 <br>
 <label for="game_numer">Select Game</label>
-<select id="game_number" onchange="initialize(this.value)">
+<select id="game_number" id="game_number" onchange="initialize(this.value)">
     <option value="1">1</option>
 </select>
 <br>
 <div class="study_stats">
- <table>
+ <table id="study_stats">
   <tr>
     <th>Box</th>
     <th># Cards</th>
@@ -70,9 +84,9 @@ Study {{.study_title}} online for free.
 <p>Study progress: <span id="progress">0</span>%</p>
 </div>
 {{ if .loggedin }}
-    <button type="button" onclick="submitProgress('{{.study_id}}')">Submit Progress</button>
+    <button type="button" id="submitProgress" onclick="submitProgress('{{.study_id}}')">Submit Progress</button>
 {{ else }}
-    <button type="button" onclick="window.location.href='/login'">Login to save Progress</button>
+    <button type="button" id="submitProgress" onclick="window.location.href='/login'">Login to save Progress</button>
 {{ end }}
 {{ if and .loggedin (not .voted) }}
     <button type="button" onclick="favorite('{{.study_id}}')" id="favoriteButton">Favorite this study</button>
@@ -84,7 +98,7 @@ Study {{.study_title}} online for free.
         <option value="random">Random</option>
     </select>
 
-
+    <br>
     <label for="board_background">Board Style</label>
     <select id="board_background" onchange="applyBoardStyle('change')">
         <option value="blue" selected>Blue</option>
