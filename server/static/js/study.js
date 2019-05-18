@@ -6650,6 +6650,17 @@ function createCards() {
     return cards;
 }
 
+function cardsWereUsed() {
+    for (var i = 0; i < Object.keys(cards).length; i++) {
+        for (var j of Object.keys(cards[i])) {
+            if (cards[i][j] > 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function initialize(game_number) {
     if (localStorage.getItem("training_mode") == null || localStorage.getItem("training_mode") == "lines") {
         localStorage.setItem("training_mode", "lines");
@@ -6662,9 +6673,9 @@ function initialize(game_number) {
     window.learn_threshold = consts.learn_threshold;
 
     //create the cards if there are none
-    if (progress == "") {
+    if (progress == "" || !cardsWereUsed() ) {
         window.cards = createCards();
-    } else {
+    } else if (window.cards == undefined){
         window.cards = JSON.parse(progress);
     }
 
