@@ -194,6 +194,9 @@ async function handleMove(orig, dest, metadata) {
     var mode = localStorage.getItem("training_mode");
     var move = moveExists(possibleMoves(game_db.game(game_number-1), pos), [orig, dest]);
 
+    //in lines mode, if the move exists but not in the current line then dont reduce the pos value
+    var updateValue = true;
+
     //in lines mode the right line has to be picked
     if (mode == "lines") {
         p = localStorage.getItem("end_of_line").substring(pos.length, pos.length+1);
@@ -204,6 +207,7 @@ async function handleMove(orig, dest, metadata) {
         }
         if (move !== false && p != move) {
             writeInfo("This move exists but in a different line.", "info");
+            updateValue = false;
         }
         if (p != move) {
             move = false;
@@ -220,8 +224,9 @@ async function handleMove(orig, dest, metadata) {
         ground.state.turnColor = orientation; 
         ground.state.movable.dests = allLegalMoves(game_db.game(game_number-1), window.pos)
 
-        //update the move value, never make it less than 0
-        cards[game_number-1][pos] = 0;
+        if (updateValue) {
+            cards[game_number-1][pos] = 0;
+        }
 
         if (wrong_counter >= 2) {
             drawShapes();
