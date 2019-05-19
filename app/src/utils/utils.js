@@ -180,3 +180,12 @@ function applyBoardStyle(call) {
     initGround();
 }
 window.applyBoardStyle = applyBoardStyle;
+
+
+function addLichessLink(game_db) {
+    var site = game_db.game(0)._site;
+    if (site.includes("lichess") && site.includes("study") && site.includes("http")) {
+        document.getElementById("study_link").innerHTML = `<br> Explore this study on lichess: <a href="${site}" target="_blank">${site}</a>`;
+    }
+}
+window.addLichessLink = addLichessLink;
