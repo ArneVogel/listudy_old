@@ -7233,6 +7233,8 @@ function initTrainingMode() {
 }
 window.initTrainingMode = initTrainingMode;
 
+
+//displays the info box, for example this move exists but in a different line
 function writeInfo(info_text, s = "default") {
     var info = document.getElementById("info");
     info.innerHTML = "";
@@ -7259,17 +7261,35 @@ function applyBoardStyle(call) {
     if (localStorage.getItem("board_background") == null) {
         localStorage.setItem("board_background", "blue");
         localStorage.setItem("board_pieces", "merida");
+        localStorage.setItem("board_size", "small");
     } 
     if (call == "load") {
         document.getElementById("board_background").value = localStorage.getItem("board_background");
         document.getElementById("board_pieces").value = localStorage.getItem("board_pieces");
+        document.getElementById("board_size").value = localStorage.getItem("board_size");
     } else if (call == "change") {
         localStorage.setItem("board_background", document.getElementById("board_background").value);
         localStorage.setItem("board_pieces", document.getElementById("board_pieces").value);
+        localStorage.setItem("board_size", document.getElementById("board_size").value);
     }
-
+    
+    //apply styles to outer div of chessboard 
     var b = document.getElementById("board_styles");
     b.classList = [`${localStorage.getItem("board_background")} ${localStorage.getItem("board_pieces")}`]
+    
+    //resize the chessboard div
+    var c = document.getElementById("chessboard");
+    var size = localStorage.getItem("board_size");
+    var width = "320px";
+    if (size == "medium") {
+        width = "420px";
+    } else if (size == "big") {
+        width = "520px";
+    }
+    c.style.width = width;
+    c.style.height = width;
+    ground.redrawAll();
+
     initGround();
 }
 window.applyBoardStyle = applyBoardStyle;

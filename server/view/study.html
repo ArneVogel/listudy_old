@@ -97,22 +97,34 @@ Study {{.study_title}} online for free.
         <option value="lines" selected>Lines</option>
         <option value="random">Random</option>
     </select>
-
-    <br>
-    <label for="board_background">Board Style</label>
-    <select id="board_background" onchange="applyBoardStyle('change')">
-        <option value="blue" selected>Blue</option>
-        <option value="brown">Brown</option>
-        <option value="marble">Marble</option>
-        <option value="wood">Wood</option>
-    </select>
-    <label for="board_pieces">Piece Style</label>
-    <select id="board_pieces" onchange="applyBoardStyle('change')">
-        <option value="merida" selected>Merida</option>
-        <option value="cburnett">Cburnett</option>
-        <option value="pirouetti">Pirouetti</option>
-    </select>
-
+    
+    <div class="row">
+        <div class="three columns">
+            <label for="board_size">Board Size</label>
+            <select id="board_size" onchange="applyBoardStyle('change')">
+                <option value="small" selected>Small</option>
+                <option value="medium">Medium</option>
+                <option value="big">Big</option>
+            </select>
+        </div>
+        <div class="three columns">
+            <label for="board_background">Board Style</label>
+            <select id="board_background" onchange="applyBoardStyle('change')">
+                <option value="blue" selected>Blue</option>
+                <option value="brown">Brown</option>
+                <option value="marble">Marble</option>
+                <option value="wood">Wood</option>
+            </select>
+        </div>
+        <div class="three columns">
+            <label for="board_pieces">Piece Style</label>
+            <select id="board_pieces" onchange="applyBoardStyle('change')">
+                <option value="merida" selected>Merida</option>
+                <option value="cburnett">Cburnett</option>
+                <option value="pirouetti">Pirouetti</option>
+            </select>
+        </div>
+    </div>
 {{ if .pgn }}
     {{/* dont show this in the tutorial */}}
     <p>This study was created by: <a href="/user/{{.creator}}">{{.creator}}</a></p>

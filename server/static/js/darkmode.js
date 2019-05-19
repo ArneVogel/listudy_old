@@ -35,6 +35,7 @@ function applyMode() {
         document.getElementById("game_number").style.background = changeToBackground;
         document.getElementById("training_mode").style.background = changeToBackground;
         document.getElementById("board_pieces").style.background = changeToBackground;
+        document.getElementById("board_size").style.background = changeToBackground;
         document.getElementById("board_background").style.background = changeToBackground;
     }
 }
