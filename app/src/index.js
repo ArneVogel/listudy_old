@@ -22,7 +22,12 @@ window.kokopu = kokopu
 window.translate = utils.toAlgebraic
 window.getConfig = consts.getChessGroundConfig
 
-var a = game_db.game(0)._mainVariationInfo.first;
+try {
+    var a = game_db.game(0)._mainVariationInfo.first;
+} catch(error) {
+    writeInfo(error, "warn")
+}
+
 window.a = a;
 
 var iterCards = {}
