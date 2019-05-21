@@ -20,23 +20,10 @@ function applyMode() {
     var changeToColor;
     if (localStorage.getItem("darkmode") == "dark") {
         document.getElementById("darkmode").innerHTML = "Light Mode"
-
-        changeToColor = "#929292";
-        changeToBackground = "#181818";
+        document.body.className = "dark-scheme"
     } else {
         document.getElementById("darkmode").innerHTML = "Dark Mode"
-
-        changeToColor = "#222";
-        changeToBackground = "white";
-    }
-    document.body.style.background = changeToBackground;
-    document.body.style.color = changeToColor;
-    if (document.getElementById("game_number") != undefined) {
-        document.getElementById("game_number").style.background = changeToBackground;
-        document.getElementById("training_mode").style.background = changeToBackground;
-        document.getElementById("board_pieces").style.background = changeToBackground;
-        document.getElementById("board_size").style.background = changeToBackground;
-        document.getElementById("board_background").style.background = changeToBackground;
+        document.body.className = "light-scheme"
     }
 }
 

@@ -73,3 +73,21 @@
   padding: 10px;
   border-radius: 3px 3px 3px 3px;
 }
+
+.light-scheme {
+    background: white none repeat scroll 0% 0%;
+    color: rgb(34, 34, 34);
+}
+.dark-scheme {
+    background: rgb(24, 24, 24) none repeat scroll 0% 0%;
+    color: rgb(146, 146, 146);
+}
+.dark-scheme select {
+    background: rgb(24, 24, 24) none repeat scroll 0% 0%;
+    color: rgb(146, 146, 146);
+}
+.light-scheme select {
+    background: white none repeat scroll 0% 0%;
+    color: rgb(34, 34, 34);
+}
+
