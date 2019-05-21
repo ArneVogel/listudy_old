@@ -1,9 +1,13 @@
 {{ define "title"}}
-Study {{.study_title}} - Listudy
+    {{if not .pgn}}
+        Tutorial
+    {{else}}
+        Study {{.study_title}} - Listudy
+    {{end}}
 {{end}}
 
 {{define "description"}}
-Study {{.study_title}} online for free.
+Study {{.study_title}} online for free using spaced repetition.
 {{end}}
 
 {{define "js"}}
