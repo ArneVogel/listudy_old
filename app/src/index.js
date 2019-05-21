@@ -3,7 +3,13 @@ var Chessground = require("chessground").Chessground;
 var utils = require('./utils/utils.js');
 var consts = require('./utils/consts.js');
 
-var game_db = kokopu.pgnRead(pgn);
+try {
+    var game_db = kokopu.pgnRead(pgn);
+} catch(error) {
+    writeInfo(error, "warn");
+    return;
+}
+
 //var game_div = document.getElementById("chessboard")
 //var ground = Chessground(game_div, consts.getChessGroundConfig(orientation, game_db.game(0).initialPosition().fen()));
 
@@ -25,7 +31,7 @@ window.getConfig = consts.getChessGroundConfig
 try {
     var a = game_db.game(0)._mainVariationInfo.first;
 } catch(error) {
-    writeInfo(error, "warn")
+    writeInfo(error, "warn");
 }
 
 window.a = a;
