@@ -6709,7 +6709,7 @@ function initialize(game_number) {
     } else {
         clearComments();
     }
-    addLichessLink(game_db);
+    initLichessEmbed(game_db);
     writeInfo("");
 }
 
@@ -7307,15 +7307,33 @@ function applyBoardStyle(call) {
 window.applyBoardStyle = applyBoardStyle;
 
 
-function addLichessLink(game_db) {
+function initLichessEmbed(game_db) {
     if (!game_db.game(0)._site) {
         return;
     }
     var site = game_db.game(0)._site;
-    if (site.includes("lichess") && site.includes("study") && site.includes("http")) {
-        document.getElementById("study_link").innerHTML = `<br> Explore this study on lichess: <a href="${site}" target="_blank">${site}</a>`;
+    if (!(site.includes("lichess") && site.includes("study") && site.includes("http"))) {
+        document.getElementById("show_lichess_container").style.visibility = "hidden";
     }
 }
-window.addLichessLink = addLichessLink;
+window.initLichessEmbed = initLichessEmbed;
+
+function show_lichess() {
+    // assumed that the user can only reach this if its actually a lichess study
+    
+    if (document.getElementById("lichess_embed").innerHTML == "") {
+        var study_url = game_db.game(game_number-1)._site;
+        study_url = study_url.replace("study", "study/embed");
+        var width = document.getElementsByClassName("row")[0].getBoundingClientRect().width;
+        var height = Math.floor(width * 0.7);
+        var embed = `<iframe width=${width} height=${height} src="${study_url}" frameborder=0></iframe>`;
+        document.getElementById("lichess_embed").innerHTML = embed;
+        document.getElementById("lichess_embed_button").innerHTML = "Hide Game";
+    } else {
+        document.getElementById("lichess_embed_button").innerHTML = "Show Game";
+        document.getElementById("lichess_embed").innerHTML = "";
+    }
+}
+window.show_lichess = show_lichess;
 
 },{"kokopu":18}]},{},[35]);

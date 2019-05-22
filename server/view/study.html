@@ -52,11 +52,18 @@ Study {{.study_title}} online for free using spaced repetition.
     </div>
 </section>
 <br>
-<label for="game_numer">Select Game</label>
-<select id="game_number" onchange="initialize(this.value)">
-    <option value="1">1</option>
-</select>
-<br>
+<div class="row">
+    <div class="column four">
+        <label for="game_numer">Select Game</label>
+        <select id="game_number" onchange="initialize(this.value)">
+            <option value="1">1</option>
+        </select>
+    </div>
+    <div id="show_lichess_container" class="column four">
+        <button onclick="show_lichess()" id="lichess_embed_button">Show Game</button>
+    </div>
+</div>
+<div id="lichess_embed"></div>
 <div id="study_link"></div>
 <div class="study_stats">
  <table id="study_stats">

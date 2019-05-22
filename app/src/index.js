@@ -225,7 +225,7 @@ function initialize(game_number) {
     } else {
         clearComments();
     }
-    addLichessLink(game_db);
+    initLichessEmbed(game_db);
     writeInfo("");
 }
 
