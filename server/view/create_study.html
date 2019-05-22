@@ -17,8 +17,18 @@ Create studies for effective chess learning.
     <p>Only upload PGN's you have the rights to.</p>
     <label for="title">Study Title</label>
     <input type="text" id="title" name="title" placeholder="A01 Nimzo Larsen Opening"><br>
-    <label for="pgn">PGN file</label>
-    <input type="file" id="pgn" name="pgn"><br>
+    <div class="row">
+        <h5>PGN file</h5>
+        <p>Upload a PGN file from your computer or specify a study url from <a href="https://lichess.org/study">lichess</a>.</p>
+        <div class="four columns">
+            <label for="pgn">Upload</label>
+            <input type="file" id="pgn" name="pgn">
+        </div>
+        <div class="four columns">
+            <label for="study_link">Lichess Study</label>
+            <input type="text" id="study_link" placeholder="https://lichess.org/study/lbFL4z6j"></input>
+        </div>
+    </div>
     <label for="description">Description</label>
     <textarea class="u-full-width" placeholder="In this study …" id="description" name="description"></textarea>
     <select name="orientation">
