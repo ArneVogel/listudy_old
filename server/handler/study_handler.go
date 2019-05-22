@@ -189,27 +189,6 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	}
 	//user_id := 1
 
-	file, err := c.FormFile("pgn")
-	if err != nil {
-		return err
-	}
-
-	limit, _ := strconv.ParseInt(utils.Env("max_file_size"), 10, 64)
-	if file.Size >= limit {
-		return errors.New("The file is too big, maximum file size limit: " + strconv.FormatInt(limit/1000000, 10) + "MB")
-	}
-
-	//TODO figure out what windows sends as mime type
-	//if file.Header["Content-Type"][0] != "application/vnd.chess-pgn" {
-	//	return errors.New("Please only upload pgn files")
-	//}
-
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-
 	dst, err := os.Create(utils.Env("pgn_folder") + id + ".pgn")
 	if err != nil {
 		return err
@@ -217,13 +196,61 @@ func (h *StudyHandler) CreateStudyPOSTHandler(c echo.Context) error {
 	defer dst.Close()
 
 	buf := bytes.NewBuffer(nil)
-	io.Copy(buf, src)
 
-	escaped := escapeString(string(buf.Bytes()))
-	//escaped := string(buf.Bytes())
+	file, err := c.FormFile("pgn")
+	url := c.FormValue("study_link")
+	var final_pgn string
 
+	//hasnt uploaded a file or given a link to a lichess study
+	if err != nil && url == "" {
+		return err
+	} else if err == nil {
+		// in this branch the content of the uploaded file is processed
+		limit, _ := strconv.ParseInt(utils.Env("max_file_size"), 10, 64)
+		if file.Size >= limit {
+			return errors.New("The file is too big, maximum file size limit: " + strconv.FormatInt(limit/1000000, 10) + "MB")
+		}
+
+		//TODO figure out what windows sends as mime type
+		//if file.Header["Content-Type"][0] != "application/vnd.chess-pgn" {
+		//	return errors.New("Please only upload pgn files")
+		//}
+
+		src, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		io.Copy(buf, src)
+
+		final_pgn = escapeString(string(buf.Bytes()))
+	} else if url != "" {
+		// here the provided lichess study url is processed
+
+		// make sure this is a lichess study link
+		if !strings.HasPrefix(url, "https://lichess.org/study") || strings.HasSuffix(url, "/") {
+			return errors.New("Please provide a valid study url like: https://lichess.org/study/lbFL4z6j")
+		}
+
+		// download the pgn from lichess
+		resp, err := http.Get(url + ".pgn")
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return errors.New("Lichess returned status: " + resp.Status)
+		}
+
+		io.Copy(buf, resp.Body)
+		final_pgn = escapeString(string(buf.Bytes()))
+	} else {
+		return errors.New("upload a pgn or provide a link to a lichess study")
+	}
 	// Copy
-	if _, err = io.Copy(dst, strings.NewReader(escaped)); err != nil {
+	if _, err = io.Copy(dst, strings.NewReader(final_pgn)); err != nil {
 		return err
 	}
 
