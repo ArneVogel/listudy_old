@@ -129,9 +129,11 @@ func main() {
 	e.POST("/login", ah.LoginPOSTHandler)
 
 	e.POST("/create-study", sh.CreateStudyPOSTHandler)
+    e.POST("/update-study/:id", sh.UpdateStudyPOST)
 	e.POST("/study/progress/*", sh.SaveProgress)
 	e.POST("/study/favorite/*", sh.FavoriteStudy)
-	e.GET("/study/*", sh.GetStudyHandler)
+    e.GET("/study/:id", sh.GetStudyHandler)
+    e.GET("/study/:id/update", sh.UpdateStudy)
 	e.POST("/delete-study/*", sh.DeleteStudy)
 
 	e.GET("/user/*", uh.UserGETHandler)

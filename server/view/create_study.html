@@ -1,22 +1,52 @@
 {{ define "title"}}
+{{if not .study_id}}
 Create a study
+{{else}}
+Update Study
+{{end}}
 {{end}}
 
 {{define "description"}}
 Create studies for effective chess learning.
 {{end}}
 
-{{define "js"}}{{end}}
+{{define "js"}}
+{{end}}
 {{define "css"}}{{end}}
-{{define "afterBodyJS"}}{{end}}
+{{define "afterBodyJS"}}
+    {{if .study_id}}
+        <script>
+        function placeLink() {
+            const start = "[Site \"https://lichess.org/"
+            const base = "https://lichess.org/study/"
+            const end = "\"]";
+            var study_pgn = {{.study_pgn}};
+            var index = study_pgn.indexOf(start);
+            if (index == -1) {
+                return;
+            }
+            study_pgn = study_pgn.slice(index+start.length, index+start.length+50);
+            study_pgn = study_pgn.slice(0,study_pgn.indexOf(end));
+            study_pgn = study_pgn.split("/")[1]
+            document.getElementById("study_link").value = base+study_pgn;
+        }
+        placeLink();
+        </script>
+    {{end}}
+{{end}}
 
 
 {{define "content"}}
+{{if not .study_id}}
 <h1>Create a Study</h1>
 <form action="/create-study" method="POST" enctype="multipart/form-data">
+{{else}}
+<h1>Update Study</h1>
+<form action="/update-study/{{.study_id}}" method="POST" enctype="multipart/form-data">
+{{end}}
     <p>Only upload PGN's you have the rights to.</p>
     <label for="title">Study Title</label>
-    <input type="text" id="title" name="title" placeholder="A01 Nimzo Larsen Opening"><br>
+    <input type="text" id="title" name="title" placeholder="A01 Nimzo Larsen Opening" {{if .study_id}}value="{{.study_title}}"{{end}}><br>
     <div class="row">
         <h5>PGN file</h5>
         <p>Upload a PGN file from your computer or specify a study url from <a href="https://lichess.org/study">lichess</a>.</p>
@@ -30,10 +60,10 @@ Create studies for effective chess learning.
         </div>
     </div>
     <label for="description">Description</label>
-    <textarea class="u-full-width" placeholder="In this study …" id="description" name="description"></textarea>
+    <textarea class="u-full-width" placeholder="In this study …" id="description" name="description">{{if .study_id}} {{.study_description}}{{end}}</textarea>
     <select name="orientation">
         <option value="white">White</option>
-        <option value="black">Black</option>
+        <option value="black" {{if .study_id }}{{if eq .study_orientation "black"}}selected{{end}}{{end}}>Black</option>
     </select>
     <p>With submitting you agree to publish the PGN to the public and to license your work under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>, for more information see the <a href="/tos#publishing_studies">Terms of Service</a></p>
     <input type="submit" value="Submit">

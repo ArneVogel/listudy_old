@@ -7,7 +7,13 @@
 {{end}}
 
 {{define "js"}}{{end}}
-{{define "css"}}{{end}}
+{{define "css"}}
+<style>
+.study_link {
+    padding-right: 20px;
+}
+</style>
+{{end}}
 {{define "afterBodyJS"}}{{end}}
 
 {{define "content"}}
@@ -17,8 +23,10 @@
     {{/* cannot use .delete_option inside the range*/}}
     {{ $delete_option := .delete_option}}
     {{range $index, $value := .study_ids}}
-        <a href="{{$.root_url}}study/{{$value}}">{{index $.study_titles $index}}</a>
+        <a class="study_link" href="/study/{{$value}}">{{index $.study_titles $index}}</a>
         {{ if $delete_option }}
+            
+            <a href="/study/{{$value}}/update"><button>Edit</button></a>
             <form method="POST" action="/delete-study/{{$value}}" style="display: inline-block; margin-left:20px;" onsubmit="return confirm('Do you really want to DELETE the study: {{index $.study_titles $index}}?');">
                 <input type="submit" value="Delete">
             </form>
