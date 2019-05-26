@@ -189,6 +189,20 @@ function cardsWereUsed(c) {
 }
 window.cardsWereUsed = cardsWereUsed;
 
+// return true if the cards from progress are the same as generated from the pgn
+function cardsAreSame(newCards,oldCards) {
+    if (! arraysEqual(Object.keys(newCards).sort(), Object.keys(oldCards).sort())) {
+        return false;
+    }
+
+    for (var i = 0; i < Object.keys(oldCards).length; i++) {
+        if (! arraysEqual(Object.keys(newCards[i]).sort(), Object.keys(oldCards[i]).sort())) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function initialize(game_number) {
     if (localStorage.getItem("training_mode") == null || localStorage.getItem("training_mode") == "lines") {
         localStorage.setItem("training_mode", "lines");
@@ -199,9 +213,8 @@ function initialize(game_number) {
     window.game_number = game_number;
     window.wrong_counter = 0;
     window.learn_threshold = consts.learn_threshold;
-
-    //create the cards if there are none
-    if (progress == "" || !cardsWereUsed(JSON.parse(progress)) ) {
+    //create the cards if there are none, the cards werent used or the pgn changed
+    if (progress == "" || !cardsWereUsed(JSON.parse(progress)) || !cardsAreSame(createCards(), JSON.parse(progress)) ) {
         window.cards = createCards();
     } else {
         window.cards = JSON.parse(progress);
