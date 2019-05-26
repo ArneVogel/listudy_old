@@ -6670,16 +6670,17 @@ function createCards() {
     return cards;
 }
 
-function cardsWereUsed() {
-    for (var i = 0; i < Object.keys(cards).length; i++) {
-        for (var j of Object.keys(cards[i])) {
-            if (cards[i][j] > 0) {
+function cardsWereUsed(c) {
+    for (var i = 0; i < Object.keys(c).length; i++) {
+        for (var j of Object.keys(c[i])) {
+            if (c[i][j] > 0) {
                 return true;
             }
         }
     }
     return false;
 }
+window.cardsWereUsed = cardsWereUsed;
 
 function initialize(game_number) {
     if (localStorage.getItem("training_mode") == null || localStorage.getItem("training_mode") == "lines") {
@@ -6693,9 +6694,9 @@ function initialize(game_number) {
     window.learn_threshold = consts.learn_threshold;
 
     //create the cards if there are none
-    if (progress == "" || !cardsWereUsed() ) {
+    if (progress == "" || !cardsWereUsed(JSON.parse(progress)) ) {
         window.cards = createCards();
-    } else if (window.cards == undefined){
+    } else {
         window.cards = JSON.parse(progress);
     }
 
@@ -7165,7 +7166,7 @@ function submitProgress(study_id) {
     var progress = JSON.stringify(cards);
     var http = new XMLHttpRequest();
     var full = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-    url = full + "/study/progress/" + study_id;
+    url = full + "/submit-progress/" + study_id;
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     var params = "progress=" + progress;

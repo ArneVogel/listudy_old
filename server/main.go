@@ -130,7 +130,7 @@ func main() {
 
 	e.POST("/create-study", sh.CreateStudyPOSTHandler)
     e.POST("/update-study/:id", sh.UpdateStudyPOST)
-	e.POST("/study/progress/*", sh.SaveProgress)
+    e.POST("/submit-progress/:id", sh.SaveProgress)
 	e.POST("/study/favorite/*", sh.FavoriteStudy)
     e.GET("/study/:id", sh.GetStudyHandler)
     e.GET("/study/:id/update", sh.UpdateStudy)

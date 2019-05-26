@@ -31,7 +31,7 @@ function submitProgress(study_id) {
     var progress = JSON.stringify(cards);
     var http = new XMLHttpRequest();
     var full = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-    url = full + "/study/progress/" + study_id;
+    url = full + "/submit-progress/" + study_id;
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     var params = "progress=" + progress;
