@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -172,7 +171,6 @@ func (h *StudyHandler) SaveProgress(c echo.Context) error {
 func (h *StudyHandler) FavoriteStudy(c echo.Context) error {
 	claims := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())
-	fmt.Println(studyID)
 
 	name := claims["name"].(string)
 	loggedin := claims["loggedin"].(bool)

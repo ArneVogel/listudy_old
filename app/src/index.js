@@ -4,6 +4,9 @@ var utils = require('./utils/utils.js');
 var consts = require('./utils/consts.js');
 
 try {
+    //replace faulty 0-0 (zeroes) as kokopu wont read faulty pgns https://github.com/yo35/kokopu/issues/6
+    pgn = pgn.split("0-0-0").join("O-O-O")
+    pgn = pgn.split("0-0").join("O-O");
     var game_db = kokopu.pgnRead(pgn);
 } catch(error) {
     writeInfo(error, "warn");
