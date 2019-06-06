@@ -42,7 +42,7 @@ window.submitProgress = submitProgress;
 function favorite(study_id) {
     var http = new XMLHttpRequest();
     var full = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-    url = full + "/study/favorite/" + study_id;
+    url = full + "/study/" + study_id + "/favorite";
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     http.send();

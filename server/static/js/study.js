@@ -263,10 +263,11 @@ function setPieces(state, pieces) {
 }
 exports.setPieces = setPieces;
 function setCheck(state, color) {
-    state.check = undefined;
     if (color === true)
         color = state.turnColor;
-    if (color)
+    if (!color)
+        state.check = undefined;
+    else
         for (var k in state.pieces) {
             if (state.pieces[k].role === 'king' && state.pieces[k].color === color) {
                 state.check = k;
@@ -691,6 +692,7 @@ function start(s, e) {
         return;
     if (e.touches && e.touches.length > 1)
         return;
+    e.preventDefault();
     var asWhite = s.orientation === 'white', bounds = s.dom.bounds(), position = util.eventPosition(e), orig = board.getKeyAtDomPos(position, asWhite, bounds);
     if (!orig)
         return;
@@ -698,8 +700,6 @@ function start(s, e) {
     var previouslySelected = s.selected;
     if (!previouslySelected && s.drawable.enabled && (s.drawable.eraseOnClick || (!piece || piece.color !== s.turnColor)))
         draw_1.clear(s);
-    if (!e.touches || piece || previouslySelected || pieceCloseTo(s, position))
-        e.preventDefault();
     var hadPremove = !!s.premovable.current;
     var hadPredrop = !!s.predroppable.current;
     s.stats.ctrlKey = e.ctrlKey;
@@ -748,19 +748,6 @@ function start(s, e) {
     s.dom.redraw();
 }
 exports.start = start;
-function pieceCloseTo(s, pos) {
-    var asWhite = s.orientation === 'white', bounds = s.dom.bounds(), radiusSq = Math.pow(bounds.width / 8, 2);
-    for (var key in s.pieces) {
-        var squareBounds = computeSquareBounds(key, asWhite, bounds), center = [
-            squareBounds.left + squareBounds.width / 2,
-            squareBounds.top + squareBounds.height / 2
-        ];
-        if (util.distanceSq(center, pos) <= radiusSq)
-            return true;
-    }
-    return false;
-}
-exports.pieceCloseTo = pieceCloseTo;
 function dragNewPiece(s, piece, e, force) {
     var key = 'a0';
     s.pieces[key] = piece;
@@ -1504,6 +1491,7 @@ function createElement(tagName) {
     return document.createElementNS('http://www.w3.org/2000/svg', tagName);
 }
 exports.createElement = createElement;
+var isTrident;
 function renderSvg(state, root) {
     var d = state.drawable, curD = d.current, cur = curD && curD.mouseSq ? curD : undefined, arrowDests = {};
     d.shapes.concat(d.autoShapes).concat(cur ? [cur] : []).forEach(function (s) {
@@ -1555,6 +1543,8 @@ function syncDefs(d, shapes, defsEl) {
     }
 }
 function syncShapes(state, shapes, brushes, arrowDests, root, defsEl) {
+    if (isTrident === undefined)
+        isTrident = util_1.computeIsTrident();
     var bounds = state.dom.bounds(), hashesInDom = {}, toRemove = [];
     shapes.forEach(function (sc) { hashesInDom[sc.hash] = false; });
     var el = defsEl.nextSibling, elHash;
@@ -1622,7 +1612,7 @@ function renderArrow(brush, orig, dest, current, shorten, bounds) {
         stroke: brush.color,
         'stroke-width': lineWidth(brush, current, bounds),
         'stroke-linecap': 'round',
-        'marker-end': 'url(#arrowhead-' + brush.key + ')',
+        'marker-end': isTrident ? undefined : 'url(#arrowhead-' + brush.key + ')',
         opacity: opacity(brush, current),
         x1: a[0],
         y1: a[1],
@@ -1685,7 +1675,7 @@ function opacity(brush, current) {
     return (brush.opacity || 1) * (current ? 0.9 : 1);
 }
 function arrowMargin(bounds, shorten) {
-    return (shorten ? 20 : 10) / 512 * bounds.width;
+    return isTrident ? 0 : ((shorten ? 20 : 10) / 512 * bounds.width);
 }
 function pos2px(pos, bounds) {
     return [(pos[0] - 0.5) * bounds.width / 8, (8.5 - pos[1]) * bounds.height / 8];
@@ -1743,6 +1733,7 @@ exports.distanceSq = function (pos1, pos2) {
 exports.samePiece = function (p1, p2) {
     return p1.role === p2.role && p1.color === p2.color;
 };
+exports.computeIsTrident = function () { return window.navigator.userAgent.indexOf('Trident/') > -1; };
 var posToTranslateBase = function (pos, asWhite, xFactor, yFactor) { return [
     (asWhite ? pos[0] - 1 : 8 - pos[0]) * xFactor,
     (asWhite ? 8 - pos[1] : pos[1] - 1) * yFactor
@@ -7190,7 +7181,7 @@ window.submitProgress = submitProgress;
 function favorite(study_id) {
     var http = new XMLHttpRequest();
     var full = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-    url = full + "/study/favorite/" + study_id;
+    url = full + "/study/" + study_id + "/favorite";
     http.open("POST", url, true);
     http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     http.send();

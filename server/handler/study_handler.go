@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -64,7 +65,7 @@ func (h *StudyHandler) GetStudyHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "study.html", b)
 }
 
-func (h *StudyHandler) UpdateStudy (c echo.Context) error {
+func (h *StudyHandler) UpdateStudy(c echo.Context) error {
 	b := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())
 
@@ -171,6 +172,7 @@ func (h *StudyHandler) SaveProgress(c echo.Context) error {
 func (h *StudyHandler) FavoriteStudy(c echo.Context) error {
 	claims := utils.ClaimsForRender(c.Cookies())
 	studyID := studyIDFromURL(c.Request().URL.String())
+	fmt.Println(studyID)
 
 	name := claims["name"].(string)
 	loggedin := claims["loggedin"].(bool)
@@ -321,7 +323,7 @@ func (h *StudyHandler) UpdateStudyPOST(c echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-    //make sure the logged in "name" is the creator of the study (user)
+	//make sure the logged in "name" is the creator of the study (user)
 	stmt, err := h.DB.Prepare("select u.name from study s join user u on s.user_id == u.id where s.id == ?")
 	if err != nil {
 		log.Println(err)
@@ -417,7 +419,6 @@ func (h *StudyHandler) UpdateStudyPOST(c echo.Context) error {
 
 	return c.Redirect(303, utils.Env("root_url")+"study/"+id)
 }
-
 
 func studyIDFromURL(url string) string {
 	url = strings.Split(url, "?")[0]
