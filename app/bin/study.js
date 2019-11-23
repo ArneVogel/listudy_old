@@ -1,24 +1,13 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = require("./util");
+const util = require("./util");
 function anim(mutation, state) {
     return state.animation.enabled ? animate(mutation, state) : render(mutation, state);
 }
 exports.anim = anim;
 function render(mutation, state) {
-    var result = mutation(state);
+    const result = mutation(state);
     state.dom.redraw();
     return result;
 }
@@ -31,18 +20,17 @@ function makePiece(key, piece) {
     };
 }
 function closer(piece, pieces) {
-    return pieces.sort(function (p1, p2) {
+    return pieces.sort((p1, p2) => {
         return util.distanceSq(piece.pos, p1.pos) - util.distanceSq(piece.pos, p2.pos);
     })[0];
 }
 function computePlan(prevPieces, current) {
-    var anims = {}, animedOrigs = [], fadings = {}, missings = [], news = [], prePieces = {};
-    var curP, preP, i, vector;
+    const anims = {}, animedOrigs = [], fadings = {}, missings = [], news = [], prePieces = {};
+    let curP, preP, i, vector;
     for (i in prevPieces) {
         prePieces[i] = makePiece(i, prevPieces[i]);
     }
-    for (var _i = 0, _a = util.allKeys; _i < _a.length; _i++) {
-        var key = _a[_i];
+    for (const key of util.allKeys) {
         curP = current.pieces[key];
         preP = prePieces[key];
         if (curP) {
@@ -58,15 +46,15 @@ function computePlan(prevPieces, current) {
         else if (preP)
             missings.push(preP);
     }
-    news.forEach(function (newP) {
-        preP = closer(newP, missings.filter(function (p) { return util.samePiece(newP.piece, p.piece); }));
+    news.forEach(newP => {
+        preP = closer(newP, missings.filter(p => util.samePiece(newP.piece, p.piece)));
         if (preP) {
             vector = [preP.pos[0] - newP.pos[0], preP.pos[1] - newP.pos[1]];
             anims[newP.key] = vector.concat(vector);
             animedOrigs.push(preP.key);
         }
     });
-    missings.forEach(function (p) {
+    missings.forEach(p => {
         if (!util.containsX(animedOrigs, p.key))
             fadings[p.key] = p.piece;
     });
@@ -75,46 +63,42 @@ function computePlan(prevPieces, current) {
         fadings: fadings
     };
 }
-var perf = window.performance !== undefined ? window.performance : Date;
 function step(state, now) {
-    var cur = state.animation.current;
+    const cur = state.animation.current;
     if (cur === undefined) {
         if (!state.dom.destroyed)
             state.dom.redrawNow();
         return;
     }
-    var rest = 1 - (now - cur.start) * cur.frequency;
+    const rest = 1 - (now - cur.start) * cur.frequency;
     if (rest <= 0) {
         state.animation.current = undefined;
         state.dom.redrawNow();
     }
     else {
-        var ease = easing(rest);
-        for (var i in cur.plan.anims) {
-            var cfg = cur.plan.anims[i];
+        const ease = easing(rest);
+        for (let i in cur.plan.anims) {
+            const cfg = cur.plan.anims[i];
             cfg[2] = cfg[0] * ease;
             cfg[3] = cfg[1] * ease;
         }
         state.dom.redrawNow(true);
-        util.raf(function (now) {
-            if (now === void 0) { now = perf.now(); }
-            return step(state, now);
-        });
+        requestAnimationFrame((now = performance.now()) => step(state, now));
     }
 }
 function animate(mutation, state) {
-    var prevPieces = __assign({}, state.pieces);
-    var result = mutation(state);
-    var plan = computePlan(prevPieces, state);
+    const prevPieces = Object.assign({}, state.pieces);
+    const result = mutation(state);
+    const plan = computePlan(prevPieces, state);
     if (!isObjectEmpty(plan.anims) || !isObjectEmpty(plan.fadings)) {
-        var alreadyRunning = state.animation.current && state.animation.current.start;
+        const alreadyRunning = state.animation.current && state.animation.current.start;
         state.animation.current = {
-            start: perf.now(),
+            start: performance.now(),
             frequency: 1 / state.animation.duration,
             plan: plan
         };
         if (!alreadyRunning)
-            step(state, perf.now());
+            step(state, performance.now());
     }
     else {
         state.dom.redraw();
@@ -122,7 +106,7 @@ function animate(mutation, state) {
     return result;
 }
 function isObjectEmpty(o) {
-    for (var _ in o)
+    for (let _ in o)
         return false;
     return true;
 }
@@ -130,15 +114,15 @@ function easing(t) {
     return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 }
 
-},{"./util":16}],2:[function(require,module,exports){
+},{"./util":17}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var board = require("./board");
-var fen_1 = require("./fen");
-var config_1 = require("./config");
-var anim_1 = require("./anim");
-var drag_1 = require("./drag");
-var explosion_1 = require("./explosion");
+const board = require("./board");
+const fen_1 = require("./fen");
+const config_1 = require("./config");
+const anim_1 = require("./anim");
+const drag_1 = require("./drag");
+const explosion_1 = require("./explosion");
 function start(state, redrawAll) {
     function toggleOrientation() {
         board.toggleOrientation(state);
@@ -146,32 +130,32 @@ function start(state, redrawAll) {
     }
     ;
     return {
-        set: function (config) {
+        set(config) {
             if (config.orientation && config.orientation !== state.orientation)
                 toggleOrientation();
-            (config.fen ? anim_1.anim : anim_1.render)(function (state) { return config_1.configure(state, config); }, state);
+            (config.fen ? anim_1.anim : anim_1.render)(state => config_1.configure(state, config), state);
         },
-        state: state,
-        getFen: function () { return fen_1.write(state.pieces); },
-        toggleOrientation: toggleOrientation,
-        setPieces: function (pieces) {
-            anim_1.anim(function (state) { return board.setPieces(state, pieces); }, state);
+        state,
+        getFen: () => fen_1.write(state.pieces),
+        toggleOrientation,
+        setPieces(pieces) {
+            anim_1.anim(state => board.setPieces(state, pieces), state);
         },
-        selectSquare: function (key, force) {
+        selectSquare(key, force) {
             if (key)
-                anim_1.anim(function (state) { return board.selectSquare(state, key, force); }, state);
+                anim_1.anim(state => board.selectSquare(state, key, force), state);
             else if (state.selected) {
                 board.unselect(state);
                 state.dom.redraw();
             }
         },
-        move: function (orig, dest) {
-            anim_1.anim(function (state) { return board.baseMove(state, orig, dest); }, state);
+        move(orig, dest) {
+            anim_1.anim(state => board.baseMove(state, orig, dest), state);
         },
-        newPiece: function (piece, key) {
-            anim_1.anim(function (state) { return board.baseNewPiece(state, piece, key); }, state);
+        newPiece(piece, key) {
+            anim_1.anim(state => board.baseNewPiece(state, piece, key), state);
         },
-        playPremove: function () {
+        playPremove() {
             if (state.premovable.current) {
                 if (anim_1.anim(board.playPremove, state))
                     return true;
@@ -179,43 +163,43 @@ function start(state, redrawAll) {
             }
             return false;
         },
-        playPredrop: function (validate) {
+        playPredrop(validate) {
             if (state.predroppable.current) {
-                var result = board.playPredrop(state, validate);
+                const result = board.playPredrop(state, validate);
                 state.dom.redraw();
                 return result;
             }
             return false;
         },
-        cancelPremove: function () {
+        cancelPremove() {
             anim_1.render(board.unsetPremove, state);
         },
-        cancelPredrop: function () {
+        cancelPredrop() {
             anim_1.render(board.unsetPredrop, state);
         },
-        cancelMove: function () {
-            anim_1.render(function (state) { board.cancelMove(state); drag_1.cancel(state); }, state);
+        cancelMove() {
+            anim_1.render(state => { board.cancelMove(state); drag_1.cancel(state); }, state);
         },
-        stop: function () {
-            anim_1.render(function (state) { board.stop(state); drag_1.cancel(state); }, state);
+        stop() {
+            anim_1.render(state => { board.stop(state); drag_1.cancel(state); }, state);
         },
-        explode: function (keys) {
+        explode(keys) {
             explosion_1.default(state, keys);
         },
-        setAutoShapes: function (shapes) {
-            anim_1.render(function (state) { return state.drawable.autoShapes = shapes; }, state);
+        setAutoShapes(shapes) {
+            anim_1.render(state => state.drawable.autoShapes = shapes, state);
         },
-        setShapes: function (shapes) {
-            anim_1.render(function (state) { return state.drawable.shapes = shapes; }, state);
+        setShapes(shapes) {
+            anim_1.render(state => state.drawable.shapes = shapes, state);
         },
-        getKeyAtDomPos: function (pos) {
-            return board.getKeyAtDomPos(pos, state.orientation === 'white', state.dom.bounds());
+        getKeyAtDomPos(pos) {
+            return board.getKeyAtDomPos(pos, board.whitePov(state), state.dom.bounds());
         },
-        redrawAll: redrawAll,
-        dragNewPiece: function (piece, event, force) {
+        redrawAll,
+        dragNewPiece(piece, event, force) {
             drag_1.dragNewPiece(state, piece, event, force);
         },
-        destroy: function () {
+        destroy() {
             board.stop(state);
             state.dom.unbind && state.dom.unbind();
             state.dom.destroyed = true;
@@ -224,18 +208,14 @@ function start(state, redrawAll) {
 }
 exports.start = start;
 
-},{"./anim":1,"./board":3,"./config":5,"./drag":6,"./explosion":9,"./fen":10}],3:[function(require,module,exports){
+},{"./anim":1,"./board":3,"./config":5,"./drag":6,"./explosion":10,"./fen":11}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util_1 = require("./util");
-var premove_1 = require("./premove");
-function callUserFunction(f) {
-    var args = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        args[_i - 1] = arguments[_i];
-    }
+const util_1 = require("./util");
+const premove_1 = require("./premove");
+function callUserFunction(f, ...args) {
     if (f)
-        setTimeout(function () { return f.apply(void 0, args); }, 1);
+        setTimeout(() => f(...args), 1);
 }
 exports.callUserFunction = callUserFunction;
 function toggleOrientation(state) {
@@ -253,8 +233,8 @@ function reset(state) {
 }
 exports.reset = reset;
 function setPieces(state, pieces) {
-    for (var key in pieces) {
-        var piece = pieces[key];
+    for (let key in pieces) {
+        const piece = pieces[key];
         if (piece)
             state.pieces[key] = piece;
         else
@@ -267,7 +247,7 @@ function setCheck(state, color) {
     if (color === true)
         color = state.turnColor;
     if (color)
-        for (var k in state.pieces) {
+        for (let k in state.pieces) {
             if (state.pieces[k].role === 'king' && state.pieces[k].color === color) {
                 state.check = k;
             }
@@ -288,14 +268,11 @@ function unsetPremove(state) {
 exports.unsetPremove = unsetPremove;
 function setPredrop(state, role, key) {
     unsetPremove(state);
-    state.predroppable.current = {
-        role: role,
-        key: key
-    };
+    state.predroppable.current = { role, key };
     callUserFunction(state.predroppable.events.set, role, key);
 }
 function unsetPredrop(state) {
-    var pd = state.predroppable;
+    const pd = state.predroppable;
     if (pd.current) {
         pd.current = undefined;
         callUserFunction(pd.events.unset);
@@ -305,16 +282,16 @@ exports.unsetPredrop = unsetPredrop;
 function tryAutoCastle(state, orig, dest) {
     if (!state.autoCastle)
         return false;
-    var king = state.pieces[orig];
+    const king = state.pieces[orig];
     if (!king || king.role !== 'king')
         return false;
-    var origPos = util_1.key2pos(orig);
+    const origPos = util_1.key2pos(orig);
     if (origPos[0] !== 5)
         return false;
     if (origPos[1] !== 1 && origPos[1] !== 8)
         return false;
-    var destPos = util_1.key2pos(dest);
-    var oldRookPos, newRookPos, newKingPos;
+    const destPos = util_1.key2pos(dest);
+    let oldRookPos, newRookPos, newKingPos;
     if (destPos[0] === 7 || destPos[0] === 8) {
         oldRookPos = util_1.pos2key([8, origPos[1]]);
         newRookPos = util_1.pos2key([6, origPos[1]]);
@@ -327,7 +304,7 @@ function tryAutoCastle(state, orig, dest) {
     }
     else
         return false;
-    var rook = state.pieces[oldRookPos];
+    const rook = state.pieces[oldRookPos];
     if (!rook || rook.role !== 'rook')
         return false;
     delete state.pieces[orig];
@@ -337,10 +314,10 @@ function tryAutoCastle(state, orig, dest) {
     return true;
 }
 function baseMove(state, orig, dest) {
-    var origPiece = state.pieces[orig], destPiece = state.pieces[dest];
+    const origPiece = state.pieces[orig], destPiece = state.pieces[dest];
     if (orig === dest || !origPiece)
         return false;
-    var captured = (destPiece && destPiece.color !== origPiece.color) ? destPiece : undefined;
+    const captured = (destPiece && destPiece.color !== origPiece.color) ? destPiece : undefined;
     if (dest == state.selected)
         unselect(state);
     callUserFunction(state.events.move, orig, dest, captured);
@@ -372,7 +349,7 @@ function baseNewPiece(state, piece, key, force) {
 }
 exports.baseNewPiece = baseNewPiece;
 function baseUserMove(state, orig, dest) {
-    var result = baseMove(state, orig, dest);
+    const result = baseMove(state, orig, dest);
     if (result) {
         state.movable.dests = undefined;
         state.turnColor = util_1.opposite(state.turnColor);
@@ -382,14 +359,14 @@ function baseUserMove(state, orig, dest) {
 }
 function userMove(state, orig, dest) {
     if (canMove(state, orig, dest)) {
-        var result = baseUserMove(state, orig, dest);
+        const result = baseUserMove(state, orig, dest);
         if (result) {
-            var holdTime = state.hold.stop();
+            const holdTime = state.hold.stop();
             unselect(state);
-            var metadata = {
+            const metadata = {
                 premove: false,
                 ctrlKey: state.stats.ctrlKey,
-                holdTime: holdTime
+                holdTime
             };
             if (result !== true)
                 metadata.captured = result;
@@ -402,19 +379,15 @@ function userMove(state, orig, dest) {
             ctrlKey: state.stats.ctrlKey
         });
         unselect(state);
+        return true;
     }
-    else if (isMovable(state, dest) || isPremovable(state, dest)) {
-        setSelected(state, dest);
-        state.hold.start();
-    }
-    else
-        unselect(state);
+    unselect(state);
     return false;
 }
 exports.userMove = userMove;
 function dropNewPiece(state, orig, dest, force) {
     if (canDrop(state, orig, dest) || force) {
-        var piece = state.pieces[orig];
+        const piece = state.pieces[orig];
         delete state.pieces[orig];
         baseNewPiece(state, piece, dest, force);
         callUserFunction(state.movable.events.afterNewPiece, piece.role, dest, {
@@ -433,23 +406,24 @@ function dropNewPiece(state, orig, dest, force) {
 }
 exports.dropNewPiece = dropNewPiece;
 function selectSquare(state, key, force) {
+    callUserFunction(state.events.select, key);
     if (state.selected) {
         if (state.selected === key && !state.draggable.enabled) {
             unselect(state);
             state.hold.cancel();
+            return;
         }
         else if ((state.selectable.enabled || force) && state.selected !== key) {
-            if (userMove(state, state.selected, key))
+            if (userMove(state, state.selected, key)) {
                 state.stats.dragged = false;
+                return;
+            }
         }
-        else
-            state.hold.start();
     }
-    else if (isMovable(state, key) || isPremovable(state, key)) {
+    if (isMovable(state, key) || isPremovable(state, key)) {
         setSelected(state, key);
         state.hold.start();
     }
-    callUserFunction(state.events.select, key);
 }
 exports.selectSquare = selectSquare;
 function setSelected(state, key) {
@@ -468,7 +442,7 @@ function unselect(state) {
 }
 exports.unselect = unselect;
 function isMovable(state, orig) {
-    var piece = state.pieces[orig];
+    const piece = state.pieces[orig];
     return !!piece && (state.movable.color === 'both' || (state.movable.color === piece.color &&
         state.turnColor === piece.color));
 }
@@ -477,12 +451,12 @@ function canMove(state, orig, dest) {
 }
 exports.canMove = canMove;
 function canDrop(state, orig, dest) {
-    var piece = state.pieces[orig];
+    const piece = state.pieces[orig];
     return !!piece && dest && (orig === dest || !state.pieces[dest]) && (state.movable.color === 'both' || (state.movable.color === piece.color &&
         state.turnColor === piece.color));
 }
 function isPremovable(state, orig) {
-    var piece = state.pieces[orig];
+    const piece = state.pieces[orig];
     return !!piece && state.premovable.enabled &&
         state.movable.color === piece.color &&
         state.turnColor !== piece.color;
@@ -493,8 +467,8 @@ function canPremove(state, orig, dest) {
         util_1.containsX(premove_1.default(state.pieces, orig, state.premovable.castle), dest);
 }
 function canPredrop(state, orig, dest) {
-    var piece = state.pieces[orig];
-    var destPiece = state.pieces[dest];
+    const piece = state.pieces[orig];
+    const destPiece = state.pieces[dest];
     return !!piece && dest &&
         (!destPiece || destPiece.color !== state.movable.color) &&
         state.predroppable.enabled &&
@@ -503,20 +477,20 @@ function canPredrop(state, orig, dest) {
         state.turnColor !== piece.color;
 }
 function isDraggable(state, orig) {
-    var piece = state.pieces[orig];
+    const piece = state.pieces[orig];
     return !!piece && state.draggable.enabled && (state.movable.color === 'both' || (state.movable.color === piece.color && (state.turnColor === piece.color || state.premovable.enabled)));
 }
 exports.isDraggable = isDraggable;
 function playPremove(state) {
-    var move = state.premovable.current;
+    const move = state.premovable.current;
     if (!move)
         return false;
-    var orig = move[0], dest = move[1];
-    var success = false;
+    const orig = move[0], dest = move[1];
+    let success = false;
     if (canMove(state, orig, dest)) {
-        var result = baseUserMove(state, orig, dest);
+        const result = baseUserMove(state, orig, dest);
         if (result) {
-            var metadata = { premove: true };
+            const metadata = { premove: true };
             if (result !== true)
                 metadata.captured = result;
             callUserFunction(state.movable.events.after, orig, dest, metadata);
@@ -528,11 +502,11 @@ function playPremove(state) {
 }
 exports.playPremove = playPremove;
 function playPredrop(state, validate) {
-    var drop = state.predroppable.current, success = false;
+    let drop = state.predroppable.current, success = false;
     if (!drop)
         return false;
     if (validate(drop)) {
-        var piece = {
+        const piece = {
             role: drop.role,
             color: state.movable.color
         };
@@ -561,79 +535,79 @@ function stop(state) {
 }
 exports.stop = stop;
 function getKeyAtDomPos(pos, asWhite, bounds) {
-    var file = Math.ceil(8 * ((pos[0] - bounds.left) / bounds.width));
+    let file = Math.ceil(8 * ((pos[0] - bounds.left) / bounds.width));
     if (!asWhite)
         file = 9 - file;
-    var rank = Math.ceil(8 - (8 * ((pos[1] - bounds.top) / bounds.height)));
+    let rank = Math.ceil(8 - (8 * ((pos[1] - bounds.top) / bounds.height)));
     if (!asWhite)
         rank = 9 - rank;
     return (file > 0 && file < 9 && rank > 0 && rank < 9) ? util_1.pos2key([file, rank]) : undefined;
 }
 exports.getKeyAtDomPos = getKeyAtDomPos;
+function whitePov(s) {
+    return s.orientation === 'white';
+}
+exports.whitePov = whitePov;
 
-},{"./premove":11,"./util":16}],4:[function(require,module,exports){
+},{"./premove":12,"./util":17}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var api_1 = require("./api");
-var config_1 = require("./config");
-var state_1 = require("./state");
-var wrap_1 = require("./wrap");
-var events = require("./events");
-var render_1 = require("./render");
-var svg = require("./svg");
-var util = require("./util");
+const api_1 = require("./api");
+const config_1 = require("./config");
+const state_1 = require("./state");
+const wrap_1 = require("./wrap");
+const events = require("./events");
+const render_1 = require("./render");
+const svg = require("./svg");
+const util = require("./util");
 function Chessground(element, config) {
-    var state = state_1.defaults();
+    const state = state_1.defaults();
     config_1.configure(state, config || {});
     function redrawAll() {
-        var prevUnbind = state.dom && state.dom.unbind;
-        element.classList.add('cg-board-wrap');
-        var bounds = util.memo(function () { return element.getBoundingClientRect(); });
-        var relative = state.viewOnly && !state.drawable.visible;
-        var elements = wrap_1.default(element, state, relative ? undefined : bounds());
-        var redrawNow = function (skipSvg) {
+        let prevUnbind = state.dom && state.dom.unbind;
+        const relative = state.viewOnly && !state.drawable.visible, elements = wrap_1.default(element, state, relative), bounds = util.memo(() => elements.board.getBoundingClientRect()), redrawNow = (skipSvg) => {
             render_1.default(state);
             if (!skipSvg && elements.svg)
                 svg.renderSvg(state, elements.svg);
         };
         state.dom = {
-            elements: elements,
-            bounds: bounds,
+            elements,
+            bounds,
             redraw: debounceRedraw(redrawNow),
-            redrawNow: redrawNow,
+            redrawNow,
             unbind: prevUnbind,
-            relative: relative
+            relative
         };
         state.drawable.prevSvgHash = '';
         redrawNow(false);
         events.bindBoard(state);
         if (!prevUnbind)
             state.dom.unbind = events.bindDocument(state, redrawAll);
+        state.events.insert && state.events.insert(elements);
     }
     redrawAll();
-    var api = api_1.start(state, redrawAll);
-    return api;
+    return api_1.start(state, redrawAll);
 }
 exports.Chessground = Chessground;
 ;
 function debounceRedraw(redrawNow) {
-    var redrawing = false;
-    return function () {
+    let redrawing = false;
+    return () => {
         if (redrawing)
             return;
         redrawing = true;
-        util.raf(function () {
+        requestAnimationFrame(() => {
             redrawNow();
             redrawing = false;
         });
     };
 }
 
-},{"./api":2,"./config":5,"./events":8,"./render":12,"./state":13,"./svg":14,"./util":16,"./wrap":17}],5:[function(require,module,exports){
+},{"./api":2,"./config":5,"./events":9,"./render":13,"./state":14,"./svg":15,"./util":17,"./wrap":18}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var board_1 = require("./board");
-var fen_1 = require("./fen");
+const board_1 = require("./board");
+const fen_1 = require("./fen");
 function configure(state, config) {
     if (config.movable && config.movable.dests)
         state.movable.dests = undefined;
@@ -653,22 +627,17 @@ function configure(state, config) {
     if (!state.animation.duration || state.animation.duration < 100)
         state.animation.enabled = false;
     if (!state.movable.rookCastle && state.movable.dests) {
-        var rank_1 = state.movable.color === 'white' ? 1 : 8;
-        var kingStartPos = 'e' + rank_1;
-        var dests_1 = state.movable.dests[kingStartPos];
-        var king = state.pieces[kingStartPos];
-        if (!dests_1 || !king || king.role !== 'king')
+        const rank = state.movable.color === 'white' ? 1 : 8, kingStartPos = 'e' + rank, dests = state.movable.dests[kingStartPos], king = state.pieces[kingStartPos];
+        if (!dests || !king || king.role !== 'king')
             return;
-        state.movable.dests[kingStartPos] = dests_1.filter(function (d) {
-            return !((d === 'a' + rank_1) && dests_1.indexOf('c' + rank_1) !== -1) &&
-                !((d === 'h' + rank_1) && dests_1.indexOf('g' + rank_1) !== -1);
-        });
+        state.movable.dests[kingStartPos] = dests.filter(d => !((d === 'a' + rank) && dests.indexOf('c' + rank) !== -1) &&
+            !((d === 'h' + rank) && dests.indexOf('g' + rank) !== -1));
     }
 }
 exports.configure = configure;
 ;
 function merge(base, extend) {
-    for (var key in extend) {
+    for (let key in extend) {
         if (isObject(base[key]) && isObject(extend[key]))
             merge(base[key], extend[key]);
         else
@@ -679,44 +648,45 @@ function isObject(o) {
     return typeof o === 'object';
 }
 
-},{"./board":3,"./fen":10}],6:[function(require,module,exports){
+},{"./board":3,"./fen":11}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var board = require("./board");
-var util = require("./util");
-var draw_1 = require("./draw");
-var anim_1 = require("./anim");
+const board = require("./board");
+const util = require("./util");
+const draw_1 = require("./draw");
+const anim_1 = require("./anim");
 function start(s, e) {
     if (e.button !== undefined && e.button !== 0)
         return;
     if (e.touches && e.touches.length > 1)
         return;
-    var asWhite = s.orientation === 'white', bounds = s.dom.bounds(), position = util.eventPosition(e), orig = board.getKeyAtDomPos(position, asWhite, bounds);
+    const bounds = s.dom.bounds(), position = util.eventPosition(e), orig = board.getKeyAtDomPos(position, board.whitePov(s), bounds);
     if (!orig)
         return;
-    var piece = s.pieces[orig];
-    var previouslySelected = s.selected;
+    const piece = s.pieces[orig];
+    const previouslySelected = s.selected;
     if (!previouslySelected && s.drawable.enabled && (s.drawable.eraseOnClick || (!piece || piece.color !== s.turnColor)))
         draw_1.clear(s);
-    if (!e.touches || piece || previouslySelected || pieceCloseTo(s, position))
+    if (e.cancelable !== false &&
+        (!e.touches || !s.movable.color || piece || previouslySelected || pieceCloseTo(s, position)))
         e.preventDefault();
-    var hadPremove = !!s.premovable.current;
-    var hadPredrop = !!s.predroppable.current;
+    const hadPremove = !!s.premovable.current;
+    const hadPredrop = !!s.predroppable.current;
     s.stats.ctrlKey = e.ctrlKey;
     if (s.selected && board.canMove(s, s.selected, orig)) {
-        anim_1.anim(function (state) { return board.selectSquare(state, orig); }, s);
+        anim_1.anim(state => board.selectSquare(state, orig), s);
     }
     else {
         board.selectSquare(s, orig);
     }
-    var stillSelected = s.selected === orig;
-    var element = pieceElementByKey(s, orig);
+    const stillSelected = s.selected === orig;
+    const element = pieceElementByKey(s, orig);
     if (piece && element && stillSelected && board.isDraggable(s, orig)) {
-        var squareBounds = computeSquareBounds(orig, asWhite, bounds);
+        const squareBounds = computeSquareBounds(orig, board.whitePov(s), bounds);
         s.draggable.current = {
-            orig: orig,
+            orig,
             origPos: util.key2pos(orig),
-            piece: piece,
+            piece,
             rel: position,
             epos: position,
             pos: [0, 0],
@@ -725,16 +695,16 @@ function start(s, e) {
                 position[1] - (squareBounds.top + squareBounds.height / 2)
             ] : [0, 0],
             started: s.draggable.autoDistance && s.stats.dragged,
-            element: element,
-            previouslySelected: previouslySelected,
+            element,
+            previouslySelected,
             originTarget: e.target
         };
         element.cgDragging = true;
         element.classList.add('dragging');
-        var ghost = s.dom.elements.ghost;
+        const ghost = s.dom.elements.ghost;
         if (ghost) {
-            ghost.className = "ghost " + piece.color + " " + piece.role;
-            util.translateAbs(ghost, util.posToTranslateAbs(bounds)(util.key2pos(orig), asWhite));
+            ghost.className = `ghost ${piece.color} ${piece.role}`;
+            util.translateAbs(ghost, util.posToTranslateAbs(bounds)(util.key2pos(orig), board.whitePov(s)));
             util.setVisible(ghost, true);
         }
         processDrag(s);
@@ -749,9 +719,9 @@ function start(s, e) {
 }
 exports.start = start;
 function pieceCloseTo(s, pos) {
-    var asWhite = s.orientation === 'white', bounds = s.dom.bounds(), radiusSq = Math.pow(bounds.width / 8, 2);
-    for (var key in s.pieces) {
-        var squareBounds = computeSquareBounds(key, asWhite, bounds), center = [
+    const asWhite = board.whitePov(s), bounds = s.dom.bounds(), radiusSq = Math.pow(bounds.width / 8, 2);
+    for (let key in s.pieces) {
+        const squareBounds = computeSquareBounds(key, asWhite, bounds), center = [
             squareBounds.left + squareBounds.width / 2,
             squareBounds.top + squareBounds.height / 2
         ];
@@ -762,39 +732,39 @@ function pieceCloseTo(s, pos) {
 }
 exports.pieceCloseTo = pieceCloseTo;
 function dragNewPiece(s, piece, e, force) {
-    var key = 'a0';
+    const key = 'a0';
     s.pieces[key] = piece;
     s.dom.redraw();
-    var position = util.eventPosition(e), asWhite = s.orientation === 'white', bounds = s.dom.bounds(), squareBounds = computeSquareBounds(key, asWhite, bounds);
-    var rel = [
+    const position = util.eventPosition(e), asWhite = board.whitePov(s), bounds = s.dom.bounds(), squareBounds = computeSquareBounds(key, asWhite, bounds);
+    const rel = [
         (asWhite ? 0 : 7) * squareBounds.width + bounds.left,
         (asWhite ? 8 : -1) * squareBounds.height + bounds.top
     ];
     s.draggable.current = {
         orig: key,
         origPos: util.key2pos(key),
-        piece: piece,
-        rel: rel,
+        piece,
+        rel,
         epos: position,
         pos: [position[0] - rel[0], position[1] - rel[1]],
         dec: [-squareBounds.width / 2, -squareBounds.height / 2],
         started: true,
-        element: function () { return pieceElementByKey(s, key); },
+        element: () => pieceElementByKey(s, key),
         originTarget: e.target,
         newPiece: true,
-        force: force || false
+        force: !!force
     };
     processDrag(s);
 }
 exports.dragNewPiece = dragNewPiece;
 function processDrag(s) {
-    util.raf(function () {
-        var cur = s.draggable.current;
+    requestAnimationFrame(() => {
+        const cur = s.draggable.current;
         if (!cur)
             return;
         if (s.animation.current && s.animation.current.plan.anims[cur.orig])
             s.animation.current = undefined;
-        var origPiece = s.pieces[cur.orig];
+        const origPiece = s.pieces[cur.orig];
         if (!origPiece || !util.samePiece(origPiece, cur.piece))
             cancel(s);
         else {
@@ -802,19 +772,18 @@ function processDrag(s) {
                 cur.started = true;
             if (cur.started) {
                 if (typeof cur.element === 'function') {
-                    var found = cur.element();
+                    const found = cur.element();
                     if (!found)
                         return;
+                    found.cgDragging = true;
+                    found.classList.add('dragging');
                     cur.element = found;
-                    cur.element.cgDragging = true;
-                    cur.element.classList.add('dragging');
                 }
-                var asWhite = s.orientation === 'white', bounds = s.dom.bounds();
                 cur.pos = [
                     cur.epos[0] - cur.rel[0],
                     cur.epos[1] - cur.rel[1]
                 ];
-                var translation = util.posToTranslateAbs(bounds)(cur.origPos, asWhite);
+                const translation = util.posToTranslateAbs(s.dom.bounds())(cur.origPos, board.whitePov(s));
                 translation[0] += cur.pos[0] + cur.dec[0];
                 translation[1] += cur.pos[1] + cur.dec[1];
                 util.translateAbs(cur.element, translation);
@@ -830,18 +799,20 @@ function move(s, e) {
 }
 exports.move = move;
 function end(s, e) {
-    var cur = s.draggable.current;
+    const cur = s.draggable.current;
     if (!cur)
         return;
+    if (e.type === 'touchend' && e.cancelable !== false)
+        e.preventDefault();
     if (e.type === 'touchend' && cur && cur.originTarget !== e.target && !cur.newPiece) {
         s.draggable.current = undefined;
         return;
     }
     board.unsetPremove(s);
     board.unsetPredrop(s);
-    var eventPos = util.eventPosition(e) || cur.epos;
-    var dest = board.getKeyAtDomPos(eventPos, s.orientation === 'white', s.dom.bounds());
-    if (dest && cur.started) {
+    const eventPos = util.eventPosition(e) || cur.epos;
+    const dest = board.getKeyAtDomPos(eventPos, board.whitePov(s), s.dom.bounds());
+    if (dest && cur.started && cur.orig !== dest) {
         if (cur.newPiece)
             board.dropNewPiece(s, cur.orig, dest, cur.force);
         else {
@@ -853,7 +824,7 @@ function end(s, e) {
     else if (cur.newPiece) {
         delete s.pieces[cur.orig];
     }
-    else if (s.draggable.deleteOnDropOff) {
+    else if (s.draggable.deleteOnDropOff && !dest) {
         delete s.pieces[cur.orig];
         board.callUserFunction(s.events.change);
     }
@@ -867,7 +838,7 @@ function end(s, e) {
 }
 exports.end = end;
 function cancel(s) {
-    var cur = s.draggable.current;
+    const cur = s.draggable.current;
     if (cur) {
         if (cur.newPiece)
             delete s.pieces[cur.orig];
@@ -879,12 +850,12 @@ function cancel(s) {
 }
 exports.cancel = cancel;
 function removeDragElements(s) {
-    var e = s.dom.elements;
+    const e = s.dom.elements;
     if (e.ghost)
         util.setVisible(e.ghost, false);
 }
 function computeSquareBounds(key, asWhite, bounds) {
-    var pos = util.key2pos(key);
+    const pos = util.key2pos(key);
     if (!asWhite) {
         pos[0] = 9 - pos[0];
         pos[1] = 9 - pos[1];
@@ -897,7 +868,7 @@ function computeSquareBounds(key, asWhite, bounds) {
     };
 }
 function pieceElementByKey(s, key) {
-    var el = s.dom.elements.board.firstChild;
+    let el = s.dom.elements.board.firstChild;
     while (el) {
         if (el.cgKey === key && el.tagName === 'PIECE')
             return el;
@@ -906,35 +877,34 @@ function pieceElementByKey(s, key) {
     return undefined;
 }
 
-},{"./anim":1,"./board":3,"./draw":7,"./util":16}],7:[function(require,module,exports){
+},{"./anim":1,"./board":3,"./draw":7,"./util":17}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var board_1 = require("./board");
-var util_1 = require("./util");
-var brushes = ['green', 'red', 'blue', 'yellow'];
+const board_1 = require("./board");
+const util_1 = require("./util");
+const brushes = ['green', 'red', 'blue', 'yellow'];
 function start(state, e) {
     if (e.touches && e.touches.length > 1)
         return;
     e.stopPropagation();
     e.preventDefault();
     e.ctrlKey ? board_1.unselect(state) : board_1.cancelMove(state);
-    var position = util_1.eventPosition(e);
-    var orig = board_1.getKeyAtDomPos(position, state.orientation === 'white', state.dom.bounds());
+    const pos = util_1.eventPosition(e), orig = board_1.getKeyAtDomPos(pos, board_1.whitePov(state), state.dom.bounds());
     if (!orig)
         return;
     state.drawable.current = {
-        orig: orig,
-        pos: position,
+        orig,
+        pos,
         brush: eventBrush(e)
     };
     processDraw(state);
 }
 exports.start = start;
 function processDraw(state) {
-    util_1.raf(function () {
-        var cur = state.drawable.current;
+    requestAnimationFrame(() => {
+        const cur = state.drawable.current;
         if (cur) {
-            var mouseSq = board_1.getKeyAtDomPos(cur.pos, state.orientation === 'white', state.dom.bounds());
+            const mouseSq = board_1.getKeyAtDomPos(cur.pos, board_1.whitePov(state), state.dom.bounds());
             if (mouseSq !== cur.mouseSq) {
                 cur.mouseSq = mouseSq;
                 cur.dest = mouseSq !== cur.orig ? mouseSq : undefined;
@@ -951,7 +921,7 @@ function move(state, e) {
 }
 exports.move = move;
 function end(state) {
-    var cur = state.drawable.current;
+    const cur = state.drawable.current;
     if (cur) {
         if (cur.mouseSq)
             addShape(state.drawable, cur);
@@ -975,20 +945,13 @@ function clear(state) {
 }
 exports.clear = clear;
 function eventBrush(e) {
-    var a = e.shiftKey && util_1.isRightButton(e) ? 1 : 0;
-    var b = e.altKey ? 2 : 0;
-    return brushes[a + b];
-}
-function not(f) {
-    return function (x) { return !f(x); };
+    return brushes[(e.shiftKey && util_1.isRightButton(e) ? 1 : 0) + (e.altKey ? 2 : 0)];
 }
 function addShape(drawable, cur) {
-    var sameShape = function (s) {
-        return s.orig === cur.orig && s.dest === cur.dest;
-    };
-    var similar = drawable.shapes.filter(sameShape)[0];
+    const sameShape = (s) => s.orig === cur.orig && s.dest === cur.dest;
+    const similar = drawable.shapes.filter(sameShape)[0];
     if (similar)
-        drawable.shapes = drawable.shapes.filter(not(sameShape));
+        drawable.shapes = drawable.shapes.filter(s => !sameShape(s));
     if (!similar || similar.brush !== cur.brush)
         drawable.shapes.push(cur);
     onChange(drawable);
@@ -998,50 +961,88 @@ function onChange(drawable) {
         drawable.onChange(drawable.shapes);
 }
 
-},{"./board":3,"./util":16}],8:[function(require,module,exports){
+},{"./board":3,"./util":17}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var drag = require("./drag");
-var draw = require("./draw");
-var util_1 = require("./util");
+const board = require("./board");
+const util = require("./util");
+const drag_1 = require("./drag");
+function setDropMode(s, piece) {
+    s.dropmode = {
+        active: true,
+        piece
+    };
+    drag_1.cancel(s);
+}
+exports.setDropMode = setDropMode;
+function cancelDropMode(s) {
+    s.dropmode = {
+        active: false
+    };
+}
+exports.cancelDropMode = cancelDropMode;
+function drop(s, e) {
+    if (!s.dropmode.active)
+        return;
+    board.unsetPremove(s);
+    board.unsetPredrop(s);
+    const piece = s.dropmode.piece;
+    if (piece) {
+        s.pieces.a0 = piece;
+        const position = util.eventPosition(e);
+        const dest = position && board.getKeyAtDomPos(position, board.whitePov(s), s.dom.bounds());
+        if (dest)
+            board.dropNewPiece(s, 'a0', dest);
+    }
+    s.dom.redraw();
+}
+exports.drop = drop;
+
+},{"./board":3,"./drag":6,"./util":17}],9:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const drag = require("./drag");
+const draw = require("./draw");
+const drop_1 = require("./drop");
+const util_1 = require("./util");
 function bindBoard(s) {
     if (s.viewOnly)
         return;
-    var boardEl = s.dom.elements.board, onStart = startDragOrDraw(s);
-    boardEl.addEventListener('touchstart', onStart);
-    boardEl.addEventListener('mousedown', onStart);
+    const boardEl = s.dom.elements.board, onStart = startDragOrDraw(s);
+    boardEl.addEventListener('touchstart', onStart, { passive: false });
+    boardEl.addEventListener('mousedown', onStart, { passive: false });
     if (s.disableContextMenu || s.drawable.enabled) {
-        boardEl.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+        boardEl.addEventListener('contextmenu', e => e.preventDefault());
     }
 }
 exports.bindBoard = bindBoard;
 function bindDocument(s, redrawAll) {
-    var unbinds = [];
+    const unbinds = [];
     if (!s.dom.relative && s.resizable) {
-        var onResize = function () {
+        const onResize = () => {
             s.dom.bounds.clear();
-            util_1.raf(redrawAll);
+            requestAnimationFrame(redrawAll);
         };
         unbinds.push(unbindable(document.body, 'chessground.resize', onResize));
     }
     if (!s.viewOnly) {
-        var onmove_1 = dragOrDraw(s, drag.move, draw.move);
-        var onend_1 = dragOrDraw(s, drag.end, draw.end);
-        ['touchmove', 'mousemove'].forEach(function (ev) { return unbinds.push(unbindable(document, ev, onmove_1)); });
-        ['touchend', 'mouseup'].forEach(function (ev) { return unbinds.push(unbindable(document, ev, onend_1)); });
-        var onScroll = function () { return s.dom.bounds.clear(); };
+        const onmove = dragOrDraw(s, drag.move, draw.move);
+        const onend = dragOrDraw(s, drag.end, draw.end);
+        ['touchmove', 'mousemove'].forEach(ev => unbinds.push(unbindable(document, ev, onmove)));
+        ['touchend', 'mouseup'].forEach(ev => unbinds.push(unbindable(document, ev, onend)));
+        const onScroll = () => s.dom.bounds.clear();
         unbinds.push(unbindable(window, 'scroll', onScroll, { passive: true }));
         unbinds.push(unbindable(window, 'resize', onScroll, { passive: true }));
     }
-    return function () { return unbinds.forEach(function (f) { return f(); }); };
+    return () => unbinds.forEach(f => f());
 }
 exports.bindDocument = bindDocument;
 function unbindable(el, eventName, callback, options) {
     el.addEventListener(eventName, callback, options);
-    return function () { return el.removeEventListener(eventName, callback); };
+    return () => el.removeEventListener(eventName, callback);
 }
 function startDragOrDraw(s) {
-    return function (e) {
+    return e => {
         if (s.draggable.current)
             drag.cancel(s);
         else if (s.drawable.current)
@@ -1050,12 +1051,16 @@ function startDragOrDraw(s) {
             if (s.drawable.enabled)
                 draw.start(s, e);
         }
-        else if (!s.viewOnly)
-            drag.start(s, e);
+        else if (!s.viewOnly) {
+            if (s.dropmode.active)
+                drop_1.drop(s, e);
+            else
+                drag.start(s, e);
+        }
     };
 }
 function dragOrDraw(s, withDrag, withDraw) {
-    return function (e) {
+    return e => {
         if (e.shiftKey || util_1.isRightButton(e)) {
             if (s.drawable.enabled)
                 withDraw(s, e);
@@ -1065,18 +1070,15 @@ function dragOrDraw(s, withDrag, withDraw) {
     };
 }
 
-},{"./drag":6,"./draw":7,"./util":16}],9:[function(require,module,exports){
+},{"./drag":6,"./draw":7,"./drop":8,"./util":17}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function explosion(state, keys) {
-    state.exploding = {
-        stage: 1,
-        keys: keys
-    };
+    state.exploding = { stage: 1, keys };
     state.dom.redraw();
-    setTimeout(function () {
+    setTimeout(() => {
         setStage(state, 2);
-        setTimeout(function () { return setStage(state, undefined); }, 120);
+        setTimeout(() => setStage(state, undefined), 120);
     }, 120);
 }
 exports.default = explosion;
@@ -1090,22 +1092,20 @@ function setStage(state, stage) {
     }
 }
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util_1 = require("./util");
-var cg = require("./types");
+const util_1 = require("./util");
+const cg = require("./types");
 exports.initial = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
-var roles = { p: 'pawn', r: 'rook', n: 'knight', b: 'bishop', q: 'queen', k: 'king' };
-var letters = { pawn: 'p', rook: 'r', knight: 'n', bishop: 'b', queen: 'q', king: 'k' };
+const roles = { p: 'pawn', r: 'rook', n: 'knight', b: 'bishop', q: 'queen', k: 'king' };
+const letters = { pawn: 'p', rook: 'r', knight: 'n', bishop: 'b', queen: 'q', king: 'k' };
 function read(fen) {
     if (fen === 'start')
         fen = exports.initial;
-    var pieces = {};
-    var row = 8;
-    var col = 0;
-    for (var _i = 0, fen_1 = fen; _i < fen_1.length; _i++) {
-        var c = fen_1[_i];
+    const pieces = {};
+    let row = 8, col = 0;
+    for (const c of fen) {
         switch (c) {
             case ' ': return pieces;
             case '/':
@@ -1115,17 +1115,17 @@ function read(fen) {
                 col = 0;
                 break;
             case '~':
-                var piece = pieces[util_1.pos2key([col, row])];
+                const piece = pieces[util_1.pos2key([col, row])];
                 if (piece)
                     piece.promoted = true;
                 break;
             default:
-                var nb = c.charCodeAt(0);
+                const nb = c.charCodeAt(0);
                 if (nb < 57)
                     col += nb - 48;
                 else {
                     ++col;
-                    var role = c.toLowerCase();
+                    const role = c.toLowerCase();
                     pieces[util_1.pos2key([col, row])] = {
                         role: roles[role],
                         color: (c === role ? 'black' : 'white')
@@ -1137,89 +1137,68 @@ function read(fen) {
 }
 exports.read = read;
 function write(pieces) {
-    return util_1.invRanks.map(function (y) { return cg.ranks.map(function (x) {
-        var piece = pieces[util_1.pos2key([x, y])];
+    return util_1.invRanks.map(y => cg.ranks.map(x => {
+        const piece = pieces[util_1.pos2key([x, y])];
         if (piece) {
-            var letter = letters[piece.role];
+            const letter = letters[piece.role];
             return piece.color === 'white' ? letter.toUpperCase() : letter;
         }
         else
             return '1';
-    }).join(''); }).join('/').replace(/1{2,}/g, function (s) { return s.length.toString(); });
+    }).join('')).join('/').replace(/1{2,}/g, s => s.length.toString());
 }
 exports.write = write;
 
-},{"./types":15,"./util":16}],11:[function(require,module,exports){
+},{"./types":16,"./util":17}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = require("./util");
+const util = require("./util");
 function diff(a, b) {
     return Math.abs(a - b);
 }
 function pawn(color) {
-    return function (x1, y1, x2, y2) { return diff(x1, x2) < 2 && (color === 'white' ? (y2 === y1 + 1 || (y1 <= 2 && y2 === (y1 + 2) && x1 === x2)) : (y2 === y1 - 1 || (y1 >= 7 && y2 === (y1 - 2) && x1 === x2))); };
+    return (x1, y1, x2, y2) => diff(x1, x2) < 2 && (color === 'white' ? (y2 === y1 + 1 || (y1 <= 2 && y2 === (y1 + 2) && x1 === x2)) : (y2 === y1 - 1 || (y1 >= 7 && y2 === (y1 - 2) && x1 === x2)));
 }
-var knight = function (x1, y1, x2, y2) {
-    var xd = diff(x1, x2);
-    var yd = diff(y1, y2);
+const knight = (x1, y1, x2, y2) => {
+    const xd = diff(x1, x2);
+    const yd = diff(y1, y2);
     return (xd === 1 && yd === 2) || (xd === 2 && yd === 1);
 };
-var bishop = function (x1, y1, x2, y2) {
+const bishop = (x1, y1, x2, y2) => {
     return diff(x1, x2) === diff(y1, y2);
 };
-var rook = function (x1, y1, x2, y2) {
+const rook = (x1, y1, x2, y2) => {
     return x1 === x2 || y1 === y2;
 };
-var queen = function (x1, y1, x2, y2) {
+const queen = (x1, y1, x2, y2) => {
     return bishop(x1, y1, x2, y2) || rook(x1, y1, x2, y2);
 };
 function king(color, rookFiles, canCastle) {
-    return function (x1, y1, x2, y2) { return (diff(x1, x2) < 2 && diff(y1, y2) < 2) || (canCastle && y1 === y2 && y1 === (color === 'white' ? 1 : 8) && ((x1 === 5 && (x2 === 3 || x2 === 7)) || util.containsX(rookFiles, x2))); };
+    return (x1, y1, x2, y2) => (diff(x1, x2) < 2 && diff(y1, y2) < 2) || (canCastle && y1 === y2 && y1 === (color === 'white' ? 1 : 8) && ((x1 === 5 && (x2 === 3 || x2 === 7)) || util.containsX(rookFiles, x2)));
 }
 function rookFilesOf(pieces, color) {
-    return Object.keys(pieces).filter(function (key) {
-        var piece = pieces[key];
+    return Object.keys(pieces).filter(key => {
+        const piece = pieces[key];
         return piece && piece.color === color && piece.role === 'rook';
-    }).map(function (key) { return util.key2pos(key)[0]; });
+    }).map((key) => util.key2pos(key)[0]);
 }
+const allPos = util.allKeys.map(util.key2pos);
 function premove(pieces, key, canCastle) {
-    var piece = pieces[key], pos = util.key2pos(key);
-    var mobility;
-    switch (piece.role) {
-        case 'pawn':
-            mobility = pawn(piece.color);
-            break;
-        case 'knight':
-            mobility = knight;
-            break;
-        case 'bishop':
-            mobility = bishop;
-            break;
-        case 'rook':
-            mobility = rook;
-            break;
-        case 'queen':
-            mobility = queen;
-            break;
-        case 'king':
-            mobility = king(piece.color, rookFilesOf(pieces, piece.color), canCastle);
-            break;
-    }
-    return util.allKeys.map(util.key2pos).filter(function (pos2) {
-        return (pos[0] !== pos2[0] || pos[1] !== pos2[1]) && mobility(pos[0], pos[1], pos2[0], pos2[1]);
-    }).map(util.pos2key);
+    const piece = pieces[key], pos = util.key2pos(key), r = piece.role, mobility = r === 'pawn' ? pawn(piece.color) : (r === 'knight' ? knight : (r === 'bishop' ? bishop : (r === 'rook' ? rook : (r === 'queen' ? queen : king(piece.color, rookFilesOf(pieces, piece.color), canCastle)))));
+    return allPos.filter(pos2 => (pos[0] !== pos2[0] || pos[1] !== pos2[1]) && mobility(pos[0], pos[1], pos2[0], pos2[1])).map(util.pos2key);
 }
 exports.default = premove;
 ;
 
-},{"./util":16}],12:[function(require,module,exports){
+},{"./util":17}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util_1 = require("./util");
-var util = require("./util");
+const util_1 = require("./util");
+const board_1 = require("./board");
+const util = require("./util");
 function render(s) {
-    var asWhite = s.orientation === 'white', posToTranslate = s.dom.relative ? util.posToTranslateRel : util.posToTranslateAbs(s.dom.bounds()), translate = s.dom.relative ? util.translateRel : util.translateAbs, boardEl = s.dom.elements.board, pieces = s.pieces, curAnim = s.animation.current, anims = curAnim ? curAnim.plan.anims : {}, fadings = curAnim ? curAnim.plan.fadings : {}, curDrag = s.draggable.current, squares = computeSquareClasses(s), samePieces = {}, sameSquares = {}, movedPieces = {}, movedSquares = {}, piecesKeys = Object.keys(pieces);
-    var k, p, el, pieceAtKey, elPieceName, anim, fading, pMvdset, pMvd, sMvdset, sMvd;
+    const asWhite = board_1.whitePov(s), posToTranslate = s.dom.relative ? util.posToTranslateRel : util.posToTranslateAbs(s.dom.bounds()), translate = s.dom.relative ? util.translateRel : util.translateAbs, boardEl = s.dom.elements.board, pieces = s.pieces, curAnim = s.animation.current, anims = curAnim ? curAnim.plan.anims : {}, fadings = curAnim ? curAnim.plan.fadings : {}, curDrag = s.draggable.current, squares = computeSquareClasses(s), samePieces = {}, sameSquares = {}, movedPieces = {}, movedSquares = {}, piecesKeys = Object.keys(pieces);
+    let k, p, el, pieceAtKey, elPieceName, anim, fading, pMvdset, pMvd, sMvdset, sMvd;
     el = boardEl.firstChild;
     while (el) {
         k = el.cgKey;
@@ -1239,7 +1218,7 @@ function render(s) {
             }
             if (pieceAtKey) {
                 if (anim && el.cgAnimating && elPieceName === pieceNameOf(pieceAtKey)) {
-                    var pos = util_1.key2pos(k);
+                    const pos = util_1.key2pos(k);
                     pos[0] += anim[2];
                     pos[1] += anim[3];
                     el.classList.add('anim');
@@ -1276,7 +1255,7 @@ function render(s) {
             }
         }
         else if (isSquareNode(el)) {
-            var cn = el.className;
+            const cn = el.className;
             if (squares[k] === cn)
                 sameSquares[k] = true;
             else if (movedSquares[cn])
@@ -1286,24 +1265,24 @@ function render(s) {
         }
         el = el.nextSibling;
     }
-    for (var sk in squares) {
+    for (const sk in squares) {
         if (!sameSquares[sk]) {
             sMvdset = movedSquares[squares[sk]];
             sMvd = sMvdset && sMvdset.pop();
-            var translation = posToTranslate(util_1.key2pos(sk), asWhite);
+            const translation = posToTranslate(util_1.key2pos(sk), asWhite);
             if (sMvd) {
                 sMvd.cgKey = sk;
                 translate(sMvd, translation);
             }
             else {
-                var squareNode = util_1.createEl('square', squares[sk]);
+                const squareNode = util_1.createEl('square', squares[sk]);
                 squareNode.cgKey = sk;
                 translate(squareNode, translation);
                 boardEl.insertBefore(squareNode, boardEl.firstChild);
             }
         }
     }
-    for (var j in piecesKeys) {
+    for (const j in piecesKeys) {
         k = piecesKeys[j];
         p = pieces[k];
         anim = anims[k];
@@ -1316,7 +1295,7 @@ function render(s) {
                     pMvd.classList.remove('fading');
                     pMvd.cgFading = false;
                 }
-                var pos = util_1.key2pos(k);
+                const pos = util_1.key2pos(k);
                 if (s.addPieceZIndex)
                     pMvd.style.zIndex = posZIndex(pos, asWhite);
                 if (anim) {
@@ -1328,7 +1307,7 @@ function render(s) {
                 translate(pMvd, posToTranslate(pos, asWhite));
             }
             else {
-                var pieceName = pieceNameOf(p), pieceNode = util_1.createEl('piece', pieceName), pos = util_1.key2pos(k);
+                const pieceName = pieceNameOf(p), pieceNode = util_1.createEl('piece', pieceName), pos = util_1.key2pos(k);
                 pieceNode.cgPiece = pieceName;
                 pieceNode.cgKey = k;
                 if (anim) {
@@ -1343,9 +1322,9 @@ function render(s) {
             }
         }
     }
-    for (var i in movedPieces)
+    for (const i in movedPieces)
         removeNodes(s, movedPieces[i]);
-    for (var i in movedSquares)
+    for (const i in movedSquares)
         removeNodes(s, movedSquares[i]);
 }
 exports.default = render;
@@ -1356,21 +1335,21 @@ function isSquareNode(el) {
     return el.tagName === 'SQUARE';
 }
 function removeNodes(s, nodes) {
-    for (var i in nodes)
+    for (const i in nodes)
         s.dom.elements.board.removeChild(nodes[i]);
 }
 function posZIndex(pos, asWhite) {
-    var z = 2 + (pos[1] - 1) * 8 + (8 - pos[0]);
+    let z = 2 + (pos[1] - 1) * 8 + (8 - pos[0]);
     if (asWhite)
         z = 67 - z;
     return z + '';
 }
 function pieceNameOf(piece) {
-    return piece.color + " " + piece.role;
+    return `${piece.color} ${piece.role}`;
 }
 function computeSquareClasses(s) {
-    var squares = {};
-    var i, k;
+    const squares = {};
+    let i, k;
     if (s.lastMove && s.highlight.lastMove)
         for (i in s.lastMove) {
             addSquare(squares, s.lastMove[i], 'last-move');
@@ -1380,13 +1359,13 @@ function computeSquareClasses(s) {
     if (s.selected) {
         addSquare(squares, s.selected, 'selected');
         if (s.movable.showDests) {
-            var dests = s.movable.dests && s.movable.dests[s.selected];
+            const dests = s.movable.dests && s.movable.dests[s.selected];
             if (dests)
                 for (i in dests) {
                     k = dests[i];
                     addSquare(squares, k, 'move-dest' + (s.pieces[k] ? ' oc' : ''));
                 }
-            var pDests = s.premovable.dests;
+            const pDests = s.premovable.dests;
             if (pDests)
                 for (i in pDests) {
                     k = pDests[i];
@@ -1394,13 +1373,13 @@ function computeSquareClasses(s) {
                 }
         }
     }
-    var premove = s.premovable.current;
+    const premove = s.premovable.current;
     if (premove)
         for (i in premove)
             addSquare(squares, premove[i], 'current-premove');
     else if (s.predroppable.current)
         addSquare(squares, s.predroppable.current.key, 'current-premove');
-    var o = s.exploding;
+    const o = s.exploding;
     if (o)
         for (i in o.keys)
             addSquare(squares, o.keys[i], 'exploding' + o.stage);
@@ -1413,11 +1392,11 @@ function addSquare(squares, key, klass) {
         squares[key] = klass;
 }
 
-},{"./util":16}],13:[function(require,module,exports){
+},{"./board":3,"./util":17}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var fen = require("./fen");
-var util_1 = require("./util");
+const fen = require("./fen");
+const util_1 = require("./util");
 function defaults() {
     return {
         pieces: fen.read(fen.initial),
@@ -1463,6 +1442,9 @@ function defaults() {
             showGhost: true,
             deleteOnDropOff: false
         },
+        dropmode: {
+            active: false
+        },
         selectable: {
             enabled: true
         },
@@ -1496,21 +1478,21 @@ function defaults() {
 }
 exports.defaults = defaults;
 
-},{"./fen":10,"./util":16}],14:[function(require,module,exports){
+},{"./fen":11,"./util":17}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util_1 = require("./util");
+const util_1 = require("./util");
 function createElement(tagName) {
     return document.createElementNS('http://www.w3.org/2000/svg', tagName);
 }
 exports.createElement = createElement;
 function renderSvg(state, root) {
-    var d = state.drawable, curD = d.current, cur = curD && curD.mouseSq ? curD : undefined, arrowDests = {};
-    d.shapes.concat(d.autoShapes).concat(cur ? [cur] : []).forEach(function (s) {
+    const d = state.drawable, curD = d.current, cur = curD && curD.mouseSq ? curD : undefined, arrowDests = {};
+    d.shapes.concat(d.autoShapes).concat(cur ? [cur] : []).forEach(s => {
         if (s.dest)
             arrowDests[s.dest] = (arrowDests[s.dest] || 0) + 1;
     });
-    var shapes = d.shapes.concat(d.autoShapes).map(function (s) {
+    const shapes = d.shapes.concat(d.autoShapes).map((s) => {
         return {
             shape: s,
             current: false,
@@ -1523,19 +1505,19 @@ function renderSvg(state, root) {
             current: true,
             hash: shapeHash(cur, arrowDests, true)
         });
-    var fullHash = shapes.map(function (sc) { return sc.hash; }).join('');
+    const fullHash = shapes.map(sc => sc.hash).join('');
     if (fullHash === state.drawable.prevSvgHash)
         return;
     state.drawable.prevSvgHash = fullHash;
-    var defsEl = root.firstChild;
+    const defsEl = root.firstChild;
     syncDefs(d, shapes, defsEl);
     syncShapes(state, shapes, d.brushes, arrowDests, root, defsEl);
 }
 exports.renderSvg = renderSvg;
 function syncDefs(d, shapes, defsEl) {
-    var brushes = {};
-    var brush;
-    shapes.forEach(function (s) {
+    const brushes = {};
+    let brush;
+    shapes.forEach(s => {
         if (s.shape.dest) {
             brush = d.brushes[s.shape.brush];
             if (s.shape.modifiers)
@@ -1543,21 +1525,21 @@ function syncDefs(d, shapes, defsEl) {
             brushes[brush.key] = brush;
         }
     });
-    var keysInDom = {};
-    var el = defsEl.firstChild;
+    const keysInDom = {};
+    let el = defsEl.firstChild;
     while (el) {
         keysInDom[el.getAttribute('cgKey')] = true;
         el = el.nextSibling;
     }
-    for (var key in brushes) {
+    for (let key in brushes) {
         if (!keysInDom[key])
             defsEl.appendChild(renderMarker(brushes[key]));
     }
 }
 function syncShapes(state, shapes, brushes, arrowDests, root, defsEl) {
-    var bounds = state.dom.bounds(), hashesInDom = {}, toRemove = [];
-    shapes.forEach(function (sc) { hashesInDom[sc.hash] = false; });
-    var el = defsEl.nextSibling, elHash;
+    const bounds = state.dom.bounds(), hashesInDom = {}, toRemove = [];
+    shapes.forEach(sc => { hashesInDom[sc.hash] = false; });
+    let el = defsEl.nextSibling, elHash;
     while (el) {
         elHash = el.getAttribute('cgHash');
         if (hashesInDom.hasOwnProperty(elHash))
@@ -1566,34 +1548,32 @@ function syncShapes(state, shapes, brushes, arrowDests, root, defsEl) {
             toRemove.push(el);
         el = el.nextSibling;
     }
-    toRemove.forEach(function (el) { return root.removeChild(el); });
-    shapes.forEach(function (sc) {
+    toRemove.forEach(el => root.removeChild(el));
+    shapes.forEach(sc => {
         if (!hashesInDom[sc.hash])
             root.appendChild(renderShape(state, sc, brushes, arrowDests, bounds));
     });
 }
-function shapeHash(_a, arrowDests, current) {
-    var orig = _a.orig, dest = _a.dest, brush = _a.brush, piece = _a.piece, modifiers = _a.modifiers;
+function shapeHash({ orig, dest, brush, piece, modifiers }, arrowDests, current) {
     return [current, orig, dest, brush, dest && arrowDests[dest] > 1,
         piece && pieceHash(piece),
         modifiers && modifiersHash(modifiers)
-    ].filter(function (x) { return x; }).join('');
+    ].filter(x => x).join('');
 }
 function pieceHash(piece) {
-    return [piece.color, piece.role, piece.scale].filter(function (x) { return x; }).join('');
+    return [piece.color, piece.role, piece.scale].filter(x => x).join('');
 }
 function modifiersHash(m) {
     return '' + (m.lineWidth || '');
 }
-function renderShape(state, _a, brushes, arrowDests, bounds) {
-    var shape = _a.shape, current = _a.current, hash = _a.hash;
-    var el;
+function renderShape(state, { shape, current, hash }, brushes, arrowDests, bounds) {
+    let el;
     if (shape.piece)
         el = renderPiece(state.drawable.pieces.baseUrl, orient(util_1.key2pos(shape.orig), state.orientation), shape.piece, bounds);
     else {
-        var orig = orient(util_1.key2pos(shape.orig), state.orientation);
+        const orig = orient(util_1.key2pos(shape.orig), state.orientation);
         if (shape.orig && shape.dest) {
-            var brush = brushes[shape.brush];
+            let brush = brushes[shape.brush];
             if (shape.modifiers)
                 brush = makeCustomBrush(brush, shape.modifiers);
             el = renderArrow(brush, orig, orient(util_1.key2pos(shape.dest), state.orientation), current, arrowDests[shape.dest] > 1, bounds);
@@ -1605,7 +1585,7 @@ function renderShape(state, _a, brushes, arrowDests, bounds) {
     return el;
 }
 function renderCircle(brush, pos, current, bounds) {
-    var o = pos2px(pos, bounds), widths = circleWidth(bounds), radius = (bounds.width + bounds.height) / 32;
+    const o = pos2px(pos, bounds), widths = circleWidth(bounds), radius = (bounds.width + bounds.height) / 32;
     return setAttributes(createElement('circle'), {
         stroke: brush.color,
         'stroke-width': widths[current ? 0 : 1],
@@ -1617,7 +1597,7 @@ function renderCircle(brush, pos, current, bounds) {
     });
 }
 function renderArrow(brush, orig, dest, current, shorten, bounds) {
-    var m = arrowMargin(bounds, shorten && !current), a = pos2px(orig, bounds), b = pos2px(dest, bounds), dx = b[0] - a[0], dy = b[1] - a[1], angle = Math.atan2(dy, dx), xo = Math.cos(angle) * m, yo = Math.sin(angle) * m;
+    const m = arrowMargin(bounds, shorten && !current), a = pos2px(orig, bounds), b = pos2px(dest, bounds), dx = b[0] - a[0], dy = b[1] - a[1], angle = Math.atan2(dy, dx), xo = Math.cos(angle) * m, yo = Math.sin(angle) * m;
     return setAttributes(createElement('line'), {
         stroke: brush.color,
         'stroke-width': lineWidth(brush, current, bounds),
@@ -1631,9 +1611,9 @@ function renderArrow(brush, orig, dest, current, shorten, bounds) {
     });
 }
 function renderPiece(baseUrl, pos, piece, bounds) {
-    var o = pos2px(pos, bounds), size = bounds.width / 8 * (piece.scale || 1), name = piece.color[0] + (piece.role === 'knight' ? 'n' : piece.role[0]).toUpperCase();
+    const o = pos2px(pos, bounds), size = bounds.width / 8 * (piece.scale || 1), name = piece.color[0] + (piece.role === 'knight' ? 'n' : piece.role[0]).toUpperCase();
     return setAttributes(createElement('image'), {
-        className: piece.role + " " + piece.color,
+        className: `${piece.role} ${piece.color}`,
         x: o[0] - size / 2,
         y: o[1] - size / 2,
         width: size,
@@ -1642,7 +1622,7 @@ function renderPiece(baseUrl, pos, piece, bounds) {
     });
 }
 function renderMarker(brush) {
-    var marker = setAttributes(createElement('marker'), {
+    const marker = setAttributes(createElement('marker'), {
         id: 'arrowhead-' + brush.key,
         orient: 'auto',
         markerWidth: 4,
@@ -1658,7 +1638,7 @@ function renderMarker(brush) {
     return marker;
 }
 function setAttributes(el, attrs) {
-    for (var key in attrs)
+    for (let key in attrs)
         el.setAttribute(key, attrs[key]);
     return el;
 }
@@ -1666,16 +1646,16 @@ function orient(pos, color) {
     return color === 'white' ? pos : [9 - pos[0], 9 - pos[1]];
 }
 function makeCustomBrush(base, modifiers) {
-    var brush = {
+    const brush = {
         color: base.color,
         opacity: Math.round(base.opacity * 10) / 10,
         lineWidth: Math.round(modifiers.lineWidth || base.lineWidth)
     };
-    brush.key = [base.key, modifiers.lineWidth].filter(function (x) { return x; }).join('');
+    brush.key = [base.key, modifiers.lineWidth].filter(x => x).join('');
     return brush;
 }
 function circleWidth(bounds) {
-    var base = bounds.width / 512;
+    const base = bounds.width / 512;
     return [3 * base, 4 * base];
 }
 function lineWidth(brush, current, bounds) {
@@ -1691,136 +1671,135 @@ function pos2px(pos, bounds) {
     return [(pos[0] - 0.5) * bounds.width / 8, (8.5 - pos[1]) * bounds.height / 8];
 }
 
-},{"./util":16}],15:[function(require,module,exports){
+},{"./util":17}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 exports.ranks = [1, 2, 3, 4, 5, 6, 7, 8];
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var _a;
-var cg = require("./types");
+const cg = require("./types");
 exports.colors = ['white', 'black'];
 exports.invRanks = [8, 7, 6, 5, 4, 3, 2, 1];
-exports.allKeys = (_a = Array.prototype).concat.apply(_a, cg.files.map(function (c) { return cg.ranks.map(function (r) { return c + r; }); }));
-exports.pos2key = function (pos) { return exports.allKeys[8 * pos[0] + pos[1] - 9]; };
-exports.key2pos = function (k) { return [k.charCodeAt(0) - 96, k.charCodeAt(1) - 48]; };
+exports.allKeys = Array.prototype.concat(...cg.files.map(c => cg.ranks.map(r => c + r)));
+exports.pos2key = (pos) => exports.allKeys[8 * pos[0] + pos[1] - 9];
+exports.key2pos = (k) => [k.charCodeAt(0) - 96, k.charCodeAt(1) - 48];
 function memo(f) {
-    var v;
-    var ret = function () {
+    let v;
+    const ret = () => {
         if (v === undefined)
             v = f();
         return v;
     };
-    ret.clear = function () { v = undefined; };
+    ret.clear = () => { v = undefined; };
     return ret;
 }
 exports.memo = memo;
-exports.timer = function () {
-    var startAt;
+exports.timer = () => {
+    let startAt;
     return {
-        start: function () { startAt = Date.now(); },
-        cancel: function () { startAt = undefined; },
-        stop: function () {
+        start() { startAt = performance.now(); },
+        cancel() { startAt = undefined; },
+        stop() {
             if (!startAt)
                 return 0;
-            var time = Date.now() - startAt;
+            const time = performance.now() - startAt;
             startAt = undefined;
             return time;
         }
     };
 };
-exports.opposite = function (c) { return c === 'white' ? 'black' : 'white'; };
+exports.opposite = (c) => c === 'white' ? 'black' : 'white';
 function containsX(xs, x) {
     return xs !== undefined && xs.indexOf(x) !== -1;
 }
 exports.containsX = containsX;
-exports.distanceSq = function (pos1, pos2) {
+exports.distanceSq = (pos1, pos2) => {
     return Math.pow(pos1[0] - pos2[0], 2) + Math.pow(pos1[1] - pos2[1], 2);
 };
-exports.samePiece = function (p1, p2) {
-    return p1.role === p2.role && p1.color === p2.color;
-};
-var posToTranslateBase = function (pos, asWhite, xFactor, yFactor) { return [
+exports.samePiece = (p1, p2) => p1.role === p2.role && p1.color === p2.color;
+const posToTranslateBase = (pos, asWhite, xFactor, yFactor) => [
     (asWhite ? pos[0] - 1 : 8 - pos[0]) * xFactor,
     (asWhite ? 8 - pos[1] : pos[1] - 1) * yFactor
-]; };
-exports.posToTranslateAbs = function (bounds) {
-    var xFactor = bounds.width / 8, yFactor = bounds.height / 8;
-    return function (pos, asWhite) { return posToTranslateBase(pos, asWhite, xFactor, yFactor); };
+];
+exports.posToTranslateAbs = (bounds) => {
+    const xFactor = bounds.width / 8, yFactor = bounds.height / 8;
+    return (pos, asWhite) => posToTranslateBase(pos, asWhite, xFactor, yFactor);
 };
-exports.posToTranslateRel = function (pos, asWhite) { return posToTranslateBase(pos, asWhite, 12.5, 12.5); };
-exports.translateAbs = function (el, pos) {
-    el.style.transform = "translate(" + pos[0] + "px," + pos[1] + "px)";
+exports.posToTranslateRel = (pos, asWhite) => posToTranslateBase(pos, asWhite, 12.5, 12.5);
+exports.translateAbs = (el, pos) => {
+    el.style.transform = `translate(${pos[0]}px,${pos[1]}px)`;
 };
-exports.translateRel = function (el, percents) {
+exports.translateRel = (el, percents) => {
     el.style.left = percents[0] + '%';
     el.style.top = percents[1] + '%';
 };
-exports.setVisible = function (el, v) {
+exports.setVisible = (el, v) => {
     el.style.visibility = v ? 'visible' : 'hidden';
 };
-exports.eventPosition = function (e) {
+exports.eventPosition = e => {
     if (e.clientX || e.clientX === 0)
         return [e.clientX, e.clientY];
     if (e.touches && e.targetTouches[0])
         return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
     return undefined;
 };
-exports.isRightButton = function (e) { return e.buttons === 2 || e.button === 2; };
-exports.createEl = function (tagName, className) {
-    var el = document.createElement(tagName);
+exports.isRightButton = (e) => e.buttons === 2 || e.button === 2;
+exports.createEl = (tagName, className) => {
+    const el = document.createElement(tagName);
     if (className)
         el.className = className;
     return el;
 };
-exports.raf = (window.requestAnimationFrame || window.setTimeout).bind(window);
 
-},{"./types":15}],17:[function(require,module,exports){
+},{"./types":16}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util_1 = require("./util");
-var types_1 = require("./types");
-var svg_1 = require("./svg");
-function wrap(element, s, bounds) {
+const util_1 = require("./util");
+const types_1 = require("./types");
+const svg_1 = require("./svg");
+function wrap(element, s, relative) {
     element.innerHTML = '';
-    element.classList.add('cg-board-wrap');
-    util_1.colors.forEach(function (c) {
-        element.classList.toggle('orientation-' + c, s.orientation === c);
-    });
+    element.classList.add('cg-wrap');
+    util_1.colors.forEach(c => element.classList.toggle('orientation-' + c, s.orientation === c));
     element.classList.toggle('manipulable', !s.viewOnly);
-    var board = util_1.createEl('div', 'cg-board');
-    element.appendChild(board);
-    var svg;
-    if (s.drawable.visible && bounds) {
+    const helper = util_1.createEl('cg-helper');
+    element.appendChild(helper);
+    const container = util_1.createEl('cg-container');
+    helper.appendChild(container);
+    const board = util_1.createEl('cg-board');
+    container.appendChild(board);
+    let svg;
+    if (s.drawable.visible && !relative) {
         svg = svg_1.createElement('svg');
         svg.appendChild(svg_1.createElement('defs'));
-        element.appendChild(svg);
+        container.appendChild(svg);
     }
     if (s.coordinates) {
-        var orientClass = s.orientation === 'black' ? ' black' : '';
-        element.appendChild(renderCoords(types_1.ranks, 'ranks' + orientClass));
-        element.appendChild(renderCoords(types_1.files, 'files' + orientClass));
+        const orientClass = s.orientation === 'black' ? ' black' : '';
+        container.appendChild(renderCoords(types_1.ranks, 'ranks' + orientClass));
+        container.appendChild(renderCoords(types_1.files, 'files' + orientClass));
     }
-    var ghost;
-    if (bounds && s.draggable.showGhost) {
+    let ghost;
+    if (s.draggable.showGhost && !relative) {
         ghost = util_1.createEl('piece', 'ghost');
         util_1.setVisible(ghost, false);
-        element.appendChild(ghost);
+        container.appendChild(ghost);
     }
     return {
-        board: board,
-        ghost: ghost,
-        svg: svg
+        board,
+        container,
+        ghost,
+        svg
     };
 }
 exports.default = wrap;
 function renderCoords(elems, className) {
-    var el = util_1.createEl('coords', className);
-    var f;
-    for (var i in elems) {
+    const el = util_1.createEl('coords', className);
+    let f;
+    for (let i in elems) {
         f = util_1.createEl('coord');
         f.textContent = elems[i];
         el.appendChild(f);
@@ -1828,7 +1807,7 @@ function renderCoords(elems, className) {
     return el;
 }
 
-},{"./svg":14,"./types":15,"./util":16}],18:[function(require,module,exports){
+},{"./svg":15,"./types":16,"./util":17}],19:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -1871,7 +1850,7 @@ exports.Game = require('./src/game').Game;
 var pgn = require('./src/pgn');
 exports.pgnRead = pgn.pgnRead;
 
-},{"./src/exception":21,"./src/game":22,"./src/i18n":23,"./src/movedescriptor":24,"./src/pgn":25,"./src/position":26,"./src/util":34}],19:[function(require,module,exports){
+},{"./src/exception":22,"./src/game":23,"./src/i18n":24,"./src/movedescriptor":25,"./src/pgn":26,"./src/position":27,"./src/util":35}],20:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -2048,7 +2027,7 @@ exports.coloredPieceFromString = function(cp) {
  * @typedef {string} GameVariant
  */
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -2108,7 +2087,7 @@ Database.prototype.game = function(index) {
 	return this._gameGetter(this._impl, index);
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -2263,7 +2242,7 @@ function toStringImpl(exceptionName, message) {
 	return exceptionName + ' -> ' + message;
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -2999,7 +2978,7 @@ Variation.prototype.play = function(move) {
 	return new Node(this._info.first, this._initialFullMoveNumber, positionBefore, this._withinLongVariation);
 };
 
-},{"./basetypes":19,"./exception":21,"./i18n":23,"./position":26}],23:[function(require,module,exports){
+},{"./basetypes":20,"./exception":22,"./i18n":24,"./position":27}],24:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -3081,7 +3060,7 @@ exports.UNEXPECTED_END_OF_TEXT          = 'Unexpected end of text: there is a pe
 exports.INVALID_GAME_INDEX              = 'Game index %1$s is invalid (only %2$s game(s) found in the PGN data).';
 exports.UNKNOWN_VARIANT                 = 'Unknown chess game variant (%1$s).';
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -3362,7 +3341,7 @@ MoveDescriptor.prototype.coloredPromotion = function() {
 	return bt.coloredPieceToString(this._finalPiece);
 };
 
-},{"./basetypes":19,"./exception":21}],25:[function(require,module,exports){
+},{"./basetypes":20,"./exception":22}],26:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -3690,7 +3669,7 @@ exports.pgnRead = function(pgnString, gameIndex) {
 	}
 };
 
-},{"./database":20,"./exception":21,"./game":22,"./i18n":23,"./position":26,"./private_pgn/tokenstream":27}],26:[function(require,module,exports){
+},{"./database":21,"./exception":22,"./game":23,"./i18n":24,"./position":27,"./private_pgn/tokenstream":28}],27:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -4392,7 +4371,7 @@ Position.prototype.notation = function() {
 	}
 };
 
-},{"./basetypes":19,"./exception":21,"./movedescriptor":24,"./private_position/attacks":28,"./private_position/fen":29,"./private_position/impl":30,"./private_position/legality":31,"./private_position/movegeneration":32,"./private_position/notation":33}],27:[function(require,module,exports){
+},{"./basetypes":20,"./exception":22,"./movedescriptor":25,"./private_position/attacks":29,"./private_position/fen":30,"./private_position/impl":31,"./private_position/legality":32,"./private_position/movegeneration":33,"./private_position/notation":34}],28:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -4688,7 +4667,7 @@ TokenStream.prototype.invalidPGNException = function(tokenIndex) {
 	return result;
 };
 
-},{"../exception":21,"../i18n":23}],28:[function(require,module,exports){
+},{"../exception":22,"../i18n":24}],29:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -4827,7 +4806,7 @@ function findSlidingAttacks(position, square, result, slidingAttacker, queenAtta
 	}
 }
 
-},{"../basetypes":19}],29:[function(require,module,exports){
+},{"../basetypes":20}],30:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -5115,7 +5094,7 @@ function castlingFromStringXFEN(castling, strict, board) {
 	return result;
 }
 
-},{"../basetypes":19,"../exception":21,"../i18n":23,"./impl":30}],30:[function(require,module,exports){
+},{"../basetypes":20,"../exception":22,"../i18n":24,"./impl":31}],31:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -5319,7 +5298,7 @@ exports.makeCopy = function(position) {
 	};
 };
 
-},{"../basetypes":19}],31:[function(require,module,exports){
+},{"../basetypes":20}],32:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -5491,7 +5470,7 @@ function isCastlingFlagLegalForChess960(position, color) {
 	}
 }
 
-},{"../basetypes":19,"./attacks":28}],32:[function(require,module,exports){
+},{"../basetypes":20,"./attacks":29}],33:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -5994,7 +5973,7 @@ exports.playNullMove = function(position) {
 	}
 };
 
-},{"../basetypes":19,"../movedescriptor":24,"./attacks":28,"./legality":31}],33:[function(require,module,exports){
+},{"../basetypes":20,"../movedescriptor":25,"./attacks":29,"./legality":32}],34:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -6407,7 +6386,7 @@ function getPawnAdvanceDescriptor(position, notation, to) {
 	throw new exception.InvalidNotation(fen.getFEN(position, 0, 1), notation, i18n.INVALID_NON_CAPTURING_PAWN_MOVE);
 }
 
-},{"../basetypes":19,"../exception":21,"../i18n":23,"../movedescriptor":24,"./attacks":28,"./fen":29,"./impl":30,"./legality":31,"./movegeneration":32}],34:[function(require,module,exports){
+},{"../basetypes":20,"../exception":22,"../i18n":24,"../movedescriptor":25,"./attacks":29,"./fen":30,"./impl":31,"./legality":32,"./movegeneration":33}],35:[function(require,module,exports){
 /******************************************************************************
  *                                                                            *
  *    This file is part of Kokopu, a JavaScript chess library.                *
@@ -6496,7 +6475,7 @@ exports.coordinatesToSquare = function(file, rank) {
 	return bt.fileToString(file) + bt.rankToString(rank);
 };
 
-},{"./basetypes":19,"./exception":21}],35:[function(require,module,exports){
+},{"./basetypes":20,"./exception":22}],36:[function(require,module,exports){
 var kokopu = require('kokopu');
 var Chessground = require("chessground").Chessground;
 var utils = require('./utils/utils.js');
@@ -6754,7 +6733,7 @@ initialize(1);
 //this has to be a window function to be called from the onchange on game number select
 window.initialize = initialize;
 
-},{"./utils/consts.js":36,"./utils/utils.js":38,"chessground":4,"kokopu":18}],36:[function(require,module,exports){
+},{"./utils/consts.js":37,"./utils/utils.js":39,"chessground":4,"kokopu":19}],37:[function(require,module,exports){
 var utils = require('./utils.js');
 var handler = require('./handler.js');
 
@@ -6795,7 +6774,7 @@ module.exports = {
     learn_threshold: learn_threshold
 }
 
-},{"./handler.js":37,"./utils.js":38}],37:[function(require,module,exports){
+},{"./handler.js":38,"./utils.js":39}],38:[function(require,module,exports){
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -7154,7 +7133,7 @@ module.exports = {
     handleMove: handleMove
 }
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var kokopu = require('kokopu');
 
 //translates the number kokopu gives a square to algebraic notation
@@ -7386,4 +7365,4 @@ function arraysEqual(a, b) {
 }
 window.arraysEqual = arraysEqual;
 
-},{"kokopu":18}]},{},[35]);
+},{"kokopu":19}]},{},[36]);
