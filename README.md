@@ -1,5 +1,5 @@
 # Listudy
-work in progress
+Depreciated, check out https://github.com/ArneVogel/listudy
 ## About
 Listudy allows you to use spaced repetition to study opening repertoires, endgames and everything else you can express in a PGN.
 
